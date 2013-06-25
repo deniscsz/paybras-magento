@@ -74,7 +74,7 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
     /**
      * Gera informações do pagamento para admin.
      */
-    protected function _prepareInfo()
+    /*protected function _prepareInfo()
     {
         $paybras = Mage::getSingleton('paybras/standard');
         if (!$order = $this->getInfo()->getOrder()) {
@@ -91,15 +91,11 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
         
         $paymentMethod = $data['forma_pagamento'];
         
-        if(!$paymentMethod || !$transactionId || !$url_redirect) {
-            
+        if ($paymentMethod == 'boleto'/* && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)*//*) {
+            $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Segunda Via do Boleto</a>)';
         }
         
-        if ($paymentMethod == 'boleto' && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)) {
-            $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Reemitir</a>)';
-        }
-        
-        if ($paymentMethod == 'boleto' && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)) {
+        if ($paymentMethod == 'tef_bb'/* && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)*//*) {
             $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Página do BB - TEF</a>)';
         }
         
@@ -112,6 +108,6 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
             'transaction_id' => $transactionId,
             'payment_method' => $paymentMethod,
         ));
-    }
+    }*/
 }
 

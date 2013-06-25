@@ -220,11 +220,11 @@
     MaskedInput.definitions['~'] = '[a-zA-Z]';
     va_state = new MaskedInput('input[name="billing[region]"]', '~~');
     
-    va_stel = new MaskedInput('input[name="shipping[telephone]"]', '(99)99999999');
+    /*va_stel = new MaskedInput('input[name="shipping[telephone]"]', '(99)99999999');
     va_scel = new MaskedInput('input[name="shipping[fax]"]', '(99)99999999?9');
     va_scep = new MaskedInput('input[name="shipping[postcode]"]', '99999-999');
     MaskedInput.definitions['~'] = '[a-zA-Z]';
-    va_sstate = new MaskedInput('input[name="shipping[region]"]', '~~');
+    va_sstate = new MaskedInput('input[name="shipping[region]"]', '~~');*/
 	
 	Validation.add('validate-taxvat','CPF Inválido',function(valueCPF) {
         var cpf = valueCPF.replace(/[^\d]+/g,'');

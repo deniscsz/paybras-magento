@@ -46,15 +46,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         }
         
         $orderId = $order->getId();
-        if ($orderId) {
-            if(!$order->getEmailSent()) {
-            	$order->sendNewOrderEmail();
-    			$order->setEmailSent(true);
-    			$order->save();
-                $paybras->log("Email do Pedido $orderId Enviado");
-            }
-        }
-
+        
         $payment = $order->getPayment();
         //Mage::register('current_order',$order);
         
@@ -76,7 +68,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         
         //echo '<br/>';
 //        echo '<br/>';
-        var_dump($resposta);
+        //var_dump($resposta);
 //        echo '<br/>';
 //        echo '<br/>';
         
@@ -127,6 +119,15 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             $url = Mage::getUrl('checkout/onepage/failure');
         }
         
+		if ($orderId) {
+            if(!$order->getEmailSent()) {
+            	$order->sendNewOrderEmail();
+    			$order->setEmailSent(true);
+    			$order->save();
+                $paybras->log("Email do Pedido $orderId Enviado");
+            }
+        }
+		
         $session->setOrderId($orderId);
         $this->getResponse()->setRedirect($url);
         //$session->unsUrlRedirect();

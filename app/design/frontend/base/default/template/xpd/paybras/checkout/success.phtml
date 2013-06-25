@@ -51,18 +51,20 @@
 <?php $order = Mage::getModel('sales/order')->loadByIncrementId($orderId); ?>
 <?php if($session->getFormaPag() == "cartao"): ?>
     <?php if($order->getState() == 'holded' || $order->getState() == 'hold'): ?>
-	<p>Seu pedido está em Análise pela Operadora.</p>
+	<p>Seu pedido está em Análise pela Operadora. Assim que seu pagamento for processado, você será notificado.</p>
     <?php endif; ?>
 <?php endif; ?>
  <?php if($session->getFormaPag() == "boleto"): ?>
 	<center>
-	<button type="button" class="button" onclick="window.open('<?php echo $session->getUrlRedirect(); ?>')"><img src="<?php echo($this->getSkinUrl('images/paybras/boleto.gif')) ?>" /></button><br />
+	<button type="button" class="button" onclick="window.open('<?php echo $session->getUrlRedirect(); ?>')"><img src="<?php echo($this->getSkinUrl('images/paybras/boleto.gif')) ?>" /></button><br /><br />
 	</center>
+	<p>Em alguns instantes você será redirecionado para seu Boleto, onde poderá imprimí-lo</p>
 <?php endif; ?>
 <?php if($session->getFormaPag() == "tef_bb"): ?>
 	<center>
-	<button type="button" class="button" onclick="window.open('<?php echo $session->getUrlRedirect(); ?>')"><img src="<?php echo($this->getSkinUrl('images/paybras/tef.gif')) ?>" /></button><br />
+	<button type="button" class="button" onclick="window.open('<?php echo $session->getUrlRedirect(); ?>')"><img src="<?php echo($this->getSkinUrl('images/paybras/tef.gif')) ?>" /></button><br /><br />
 	</center>
+	<p>Em alguns instantes você será redirecionado para a página do Banco do Brasil.</p>
 <?php endif; ?>
 <?php /** Fim Alteração Paybras */?>
 
@@ -83,3 +85,11 @@
 <div class="buttons-set">
     <button type="button" class="button" title="<?php echo $this->__('Continue Shopping') ?>" onclick="window.location='<?php echo $this->getUrl() ?>'"><span><span><?php echo $this->__('Continue Shopping') ?></span></span></button>
 </div>
+
+<?php if($session->getFormaPag() != "cartao" && $session->getUrlRedirect()): ?>
+<script type="text/javascript">
+window.setTimeout(function() {
+	location.href = "<?php echo $session->getUrlRedirect(); ?>";
+}, 6000);
+</script>
+<?php endif; ?>
