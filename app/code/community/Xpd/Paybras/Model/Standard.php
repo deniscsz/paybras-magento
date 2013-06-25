@@ -297,7 +297,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             }
             $fields['entrega_cep'] = str_replace('.','',$shippingAddress->getData('postcode'));
             $fields['entrega_cidade'] = $shippingAddress->getData('city');
-            $fields['entrega_estado'] = $shippingAddress->getRegionCode();
+            $fields['entrega_estado'] = $shippingAddress->getRegionCode() ? $shippingAddress->getRegionCode() : $billingAddress->getRegionCode();
             $fields['entrega_pais'] = $shippingAddress->getCountry() ? Mage::helper('paybras')->convertCodeCountry($shippingAddress->getCountry()) : "BRA";
         }
         else {
@@ -494,30 +494,44 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         //      daniel a   - daniel silva almeida (true) - 2 acertos - tolerancia de 1
         //      daniel d b - daniel silva almeida (false) - 1 acerto - tolerancia de 1 - ainda faltou 1 acerto.
         //      daniel d   - daniel almeida       (false) - 1 acerto - tolerancia de 1 - ainda faltou 1 acerto.
-    
+        $totalCompare = (count($nomecartao) >= count($nomepessoa)) ? count($nomecartao) - 1 : count($nomepessoa) - 1;
+        $minCompare = (count($nomecartao) <= count($nomepessoa)) ? count($nomecartao) - 1 : count($nomepessoa) - 1;
+        $inicial = 0;
+           
         for ($i = 1; $i < count($nomecartao); $i++) {
-            $encontrou = false;
+            $encontrou = false;         
     
             for ($j = 1; $j < count($nomepessoa) && !$encontrou; $j++) {
                 // compara quantidade de caracteres iguais
                 // se no sobrenome havia uma letra (s) do sobrenome completo
                 // "silva" pegamos apenas o primeiro caracter para comparacao
-    
+                
                 if (strlen($nomecartao[$i]) == 1) {
                     if ($nomecartao[$i] == $nomepessoa[$j][0]) {
                         $encontrou = true;
                         $acertos++;
                     }
                 } else if (strlen($nomecartao[$i]) > 1) {
-                    if ($this->percentStringCompare($nomecartao[$i], $nomepessoa[$j]) > 50) {
+                    similar_text($nomecartao[$i], $nomepessoa[$j],$persim);
+                    //echo $nomecartao[$i] . '=' . $nomepessoa[$j] . ' - ' . (similar_text($nomecartao[$i], $nomepessoa[$j], $per)) .' | ' . "($per) <br/> ";
+                    
+                    if ($nomecartao[$i][0] == $nomepessoa[$j][0] && $persim >= 70) {
                         $encontrou = true;
                         $acertos++;
                     }
+                    else if($nomecartao[$i][0] != $nomepessoa[$j][0]) {
+                        $inicial += 1;
+                    }                                        
                 }
             }
         }
-    
-        if ($acertos == $objetivo_comparacoes || $acertos == $objetivo_comparacoes - 1) {
+        
+        //var_dump($inicial);
+        //var_dump($acertos);
+        //var_dump($objetivo_comparacoes);
+        //var_dump(($totalCompare - $inicial) <= $minCompare);
+        //var_dump(($acertos == $objetivo_comparacoes || $acertos == $objetivo_comparacoes - 1) && ($totalCompare - $inicial) <= $minCompare);
+        if (($acertos == $objetivo_comparacoes || $acertos == $objetivo_comparacoes - 1) && (($totalCompare - $inicial) <= $minCompare)) {
             return true;
         }
     }
@@ -543,31 +557,31 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     		Mage::throwException($errorMsg);
     	}
         
-        /*
-    	if($formapagamento=="cartaodecredito") {
-    		if(empty($cartaobandeira) || empty($nome) || empty($cpf) || empty($numerocartao) || empty($codseguranca)) {
+        
+    	if($additionaldata['forma_pagamento'] == "cartao") {
+    		if(empty($cartaobandeira) || empty($nomecartao) || empty($numerocartao) || empty($expiracaomes) || empty($expiracaoano) || empty($codseguranca)) {
                 $errorCode = 'invalid_data';
                 $errorMsg = $this->_getHelper()->__('Campos de preenchimento obrigatório');
-    
-                if(! $this->isCpfValid($cpf)) {
+                
+                /*if(!$this->isCpfValid($cpf)) {
                     $errorCode = 'invalid_data';
                     $errorMsg = $this->_getHelper()->__('CPF inválido.');
 
                     #gera uma exception caso nenhuma forma de pagamento seja selecionada
                     Mage::throwException($errorMsg);
-                }
+                }*/
 
-                $validCartao = $this->validaNumeroDoCartao($numerocartao, $codseguranca, $cartaobandeira);
+                /*$validCartao = $this->validaNumeroDoCartao($numerocartao, $codseguranca, $cartaobandeira);
                 
-                if(! $validCartao) {
+                if(!$validCartao) {
                     $errorCode = 'invalid_data';
                     $errorMsg = $this->_getHelper()->__('Cartão inválido. Revise os dados informados e tente novamente.');
 
                     #gera uma exception caso nenhuma forma de pagamento seja selecionada
                     Mage::throwException($errorMsg);
-                }
+                }*/
 
-                $validadataCartao = $this->validaDataCartaoDeCredito($expiracaomes, $expiracaoano);
+                /*$validadataCartao = $this->validaDataCartaoDeCredito($expiracaomes, $expiracaoano);
                 
                 if(! $validadataCartao) {
                     $errorCode = 'invalid_data';
@@ -575,23 +589,13 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 
                     #gera uma exception caso nenhuma forma de pagamento seja selecionada
                     Mage::throwException($errorMsg);
-                }
+                }*/
 
                 #gera uma exception caso os campos do cartão nao forem preenchidos
                 Mage::throwException($errorMsg);
             }
     	}
-    
-    	if($formapagamento === "tef") {
-            if(empty($tefbandeira)){
-                $errorCode = 'invalid_data';
-                $errorMsg = $this->_getHelper()->__('Escolha o banco pelo qual deseja realizar a tranferẽncia eletrônica (TEF)');
-    		
-                #gera uma exception caso os campos de tef não forem preenchidos
-                Mage::throwException($errorMsg);
-    		}
-    	}
-   	    */
+        
     	return $this;
     }
     

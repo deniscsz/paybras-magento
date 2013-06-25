@@ -13,4 +13,12 @@ class Xpd_Paybras_Block_Standard_Pagamento extends Mage_Core_Block_Abstract {
         $this->setTemplate('xpd/paybras/standard/pagamento.phtml');
     }*/
     
+    protected function _toHtml(){
+        $standard = Mage::getModel('paybras/standard');
+        
+        $html = '';
+        $html .= '';
+        
+    }
+    
 }

@@ -56,7 +56,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         }
 
         $payment = $order->getPayment();
-        Mage::register('current_order',$order);
+        //Mage::register('current_order',$order);
         
         if($order->getCustomerId()) {
             $customer = Mage::getModel('customer/customer')->load($order->getCustomerId());
@@ -91,7 +91,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 if($json_php->{'sucesso'} == '0') {
                     $code_erro = $json_php->{'mensagem_erro'};
                     $error_msg = Mage::helper('paybras')->msgError($code_erro);
-                    $paybras->log('False para consulta');
+                    $paybras->log('False para consulta. Erro: '.$error_msg);
                     $flag = false;
                 }
                 else {
@@ -112,11 +112,13 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             $paybras->processStatus($order,$status_codigo,$transactionId);
             
             $session->setFormaPag($fields['pedido_meio_pagamento']);
-            $url_redirect = utf8_decode($json_php->{'url_pagamento'});
             
-            if($url_redirect) {
-                $session->setUrlRedirect($url_redirect);
-                $payment->setPaybrasOrderId($url_redirect)->save();
+            if($fields['pedido_meio_pagamento'] == 'boleto' || $fields['pedido_meio_pagamento'] == 'tef_bb') {
+                $url_redirect = utf8_decode($json_php->{'url_pagamento'});
+                if($url_redirect) {
+                    $session->setUrlRedirect($url_redirect);
+                    $payment->setPaybrasOrderId($url_redirect)->save();
+                }
             }
             
             $url = Mage::getUrl('checkout/onepage/success');
@@ -184,6 +186,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 //        else {
             $this->loadLayout();
     		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+            $this->getLayout()->getBlock('content')->append($this->getLayout()->createBlock('pay/standard_pagamento'));
     		//$this->getLayout()->getBlock('content')->append($this->getLayout()->createBlock('paybras/standard_pagamento'));
             //Zend_Debug::dump($this->getLayout()->getUpdate()->getHandles());
             $this->renderLayout();
@@ -197,8 +200,8 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
     public function capturaAction() {
         if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybras/notification')) {
             $paybras = $this->getStandard();
-            $paybras->log($json);
             $json = $_POST['data'];
+            $paybras->log($json);
             
             if(!$json) {
                 $json = $_POST;

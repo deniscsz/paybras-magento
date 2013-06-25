@@ -89,8 +89,8 @@ function onCardChange(optElement) {
         }
     }
 
-    $('paybras_cc_number').value = "";
-    $('paybras_cc_cid').value = "";
+    $('<?php echo $_code ?>_cc_number').value = "";
+    $('<?php echo $_code ?>_cc_cid').value = "";
 }
 
 function mascara(o,f) {
@@ -197,7 +197,7 @@ function numeros(v){
             </div>
         </li>
         
-        <li id="<?php echo $_code ?>_cc_cpftitular_div">
+        <li id="<?php echo $_code ?>_cc_cpftitular_div" style="display: none;">
             <label for="<?php echo $_code ?>_cc_cpftitular" class="required"><em>*</em><?php echo $this->__("TAX/VAT of Card's Owner") ?></label><br />
             <div class="input-box">
                 <div class="v-fix">
@@ -206,7 +206,7 @@ function numeros(v){
             </div>
         </li>
         
-        <li id="<?php echo $_code ?>_cc_phone_div">
+        <li id="<?php echo $_code ?>_cc_phone_div" style="display: none;">
             <label for="<?php echo $_code ?>_cc_phone" class="required"><em>*</em><?php echo $this->__('Telephone') ?></label><br />
             <div class="input-box">
                 <div class="v-fix">
@@ -215,7 +215,7 @@ function numeros(v){
             </div>
         </li>
         
-        <li id="<?php echo $_code ?>_cc_type_dob_div">
+        <li id="<?php echo $_code ?>_cc_type_dob_div" style="display: none;">
             <label for="<?php echo $_code ?>_dob" class="required"><em>*</em><?php echo $this->__('Date of Birthday') ?></label><br />
             <div class="input-box">
                 <div class="v-fix">
@@ -270,35 +270,6 @@ function numeros(v){
 <script type="text/javascript">
     function attrName(element) {
         nomeTitular = element.value;
-    }
-    
-    function toogleFields() {
-        /*if(nomeComprador) {
-            if(comparaNome(nomeComprador,nomeTitular)) {
-                document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="none";
-                document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="none";
-                document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="none";
-            }
-            else {
-                document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
-                document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
-                document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
-            }
-        }
-        else { //nomeTitular = document.getElementById("<?php echo $_code ?>_cc_owner").value
-            name = document.getElementById("<?php echo $_code ?>_cc_owner").value;
-            
-            if(comparaNome(nomeComprador,name)) {
-                document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="none";
-                document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="none";
-                document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="none";
-            }
-            else {
-                document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
-                document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
-                document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
-            }
-        }*/
     }
     
     function toggleBoleto() {
@@ -357,35 +328,37 @@ function numeros(v){
         new Ajax.Request('<?php echo Mage::getBaseUrl(); ?>paybras/standard/compara?nome='+nomeComprador+'&titular='+nomeTitular+'', {
             method:'get',
             onSuccess: function(transport) {
-                var response = transport.responseText || "no response text";
-                alert("Success! \n\n" + response);
+                var response = transport.responseText || -1;
+                
+                if(response == 1) {
+                    document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="none";
+                    document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="none";
+                    document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="none";
+                }
+                else {
+					document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
+					document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
+					document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
+                }
             },
-            onFailure: function() { alert('Something went wrong...'); }
+            onFailure: function() { 
+				document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
+				document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
+				document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
+			}
         });
     }
     
     <?php $quote = Mage::getSingleton('checkout/session')->getQuote(); ?>
     <?php $billingaddress = $quote->getBillingAddress(); ?>
     <?php $customer = Mage::getSingleton('customer/session')->getCustomer(); ?>
-    <?php $name = ''; ?>
-    
-    <?php if($customer): ?>
-        <?php $name = $customer->getName(); ?>
-    <?php else: ?>
-        <?php if($billingaddress): //var_dump($billingaddress);?>
-            <?php $name = $billingaddress->getName(); ?>
-            <?php if(!$name): ?>
-                <?php $name = $billingaddress->getFirstname() . ' ' . $billingaddress->getLastname(); ?>
-            <?php endif; ?>
-        <?php endif; ?>
-    <?php endif; ?>
+    <?php $name = $billingaddress->getFirstname() . ' ' . $billingaddress->getLastname(); ?>
     
     nomeComprador = '<?php echo $name; ?>';
     nomeTitular = '';
     
-    Event.observe(window, 'load', function() {
-        new MaskedInput('paybras_cc_cpftitular', '999.999.999-99');
-        new MaskedInput('paybras_cc_phone', '(99)99999999?9');
-    });
+    new MaskedInput('input[name="payment[cc_cpftitular]"]', '999.999.999-99');
+    new MaskedInput('input[name="payment[cc_phone]"]', '(99)99999999?9');
+    
+    //});
 </script>
-

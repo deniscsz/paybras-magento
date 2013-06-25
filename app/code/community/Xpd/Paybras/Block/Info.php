@@ -91,9 +91,12 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
      */
     protected function _prepareInfo()
     {
-        $pagseguro = $this->getPagSeguro();
+        $paybras = Mage::getSingleton('paybras/standard');
         if (!$order = $this->getInfo()->getOrder()) {
             $order = $this->getInfo()->getQuote();
+        }
+        if(!$order) {
+            $order = $paybras->getOrder();
         }
         
         $transactionId = $this->getInfo()->getPaybrasTransactionId();
@@ -102,6 +105,10 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
         $data = unserialize($data);
         
         $paymentMethod = $data['forma_pagamento'];
+        
+        if(!$paymentMethod || !$transactionId || !$url_redirect) {
+            
+        }
         
         if ($paymentMethod == 'boleto' && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)) {
             $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Reemitir</a>)';
