@@ -170,3 +170,11 @@
     width:auto !important;
     margin-right:5px
 }
+
+.li-boleto #boleto {
+	margin-top: 10px;
+}
+
+.li-tef #tef {
+	margin-top: 10px;
+}

@@ -99,6 +99,22 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </allvalidation>
+						<textboleto translate="label">
+                            <label>Texto para seção do Boleto</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>44</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </textboleto>
+						<texttef translate="label">
+                            <label>Texto para seção do TEF</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>44</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </texttef>
                     </fields>
                 </paybras>
             </groups>

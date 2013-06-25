@@ -143,6 +143,8 @@
                 <captura>1</captura>
                 <ativarlabel>1</ativarlabel>
                 <enablevalidate>1</enablevalidate>
+				<textboleto>Após a confirmação do pedido você poderá gerar e imprimir seu boleto</textboleto>
+				<texttef>Após a confirmação do pedido você será redirecionado para o site do Banco do Brasil</texttef>
             </paybras>
         </payment>
     </default>

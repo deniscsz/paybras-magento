@@ -250,7 +250,7 @@ function numeros(v){
         <label style="float: none;" for="forma-pagamento-boleto">Boleto</label>
         
         <div id="boleto" style="display: none;">
-            <p>Boleto aqui</p>
+            <p><?php echo Mage::getStoreConfig('payment/paybras/textboleto'); ?></p>
         </div>
     </li>
     
@@ -259,7 +259,7 @@ function numeros(v){
 		<label style="float: none;" for="forma-pagamento-tef">Débito Online</label>
         
         <div id="tef" style="display: none;">
-            <p>Tef aqui</p>
+            <p><?php echo Mage::getStoreConfig('payment/paybras/texttef'); ?></p>
         </div>
     </li>
     
@@ -321,7 +321,7 @@ function numeros(v){
     }
     
     function comparaNome(nomeTitular) {
-        if(document.getElementById("billing:firstname").value) {
+        if(document.getElementById("billing:firstname").value && document.getElementById("billing:lastname").value) {
             nomeComprador = document.getElementById("billing:firstname").value + ' ' + document.getElementById("billing:lastname").value;
         }
         
