@@ -254,26 +254,35 @@ function numeros(v){
         </div>
     </li>
     
+    <?php if(Mage::getStoreConfig('payment/paybras/teftypes')): ?>
     <li id="li-tef">
         <input onclick="toggleTef();" type="radio" value="tef_bb" name="forma_pagamento" id="forma-pagamento-tef"/>
 		<label style="float: none;" for="forma-pagamento-tef">Débito Online</label>
         
         <div id="tef" style="display: none;">
             <p><?php echo Mage::getStoreConfig('payment/paybras/texttef'); ?></p>
-			
 			<ul>
 				<li>
 					<p>Escolha seu banco:</p>
-					<select id="<?php echo $_code ?>_tef_banco" name="payment[tef_banco]" class="tef_banco required-entry">
-						<!--option value="">Selecione ...</option-->
-						<option value="tef_bb">Banco do Brasil</option>
-						<option value="tef_bradesco">Bradesco</option>
-						<option value="tef_itau">Itaú</option>
+                    <?php $tefTypes = explode(",",Mage::getStoreConfig('payment/paybras/teftypes')); ?>
+                    <select id="<?php echo $_code ?>_tef_banco" name="payment[tef_banco]" class="tef_banco required-entry">
+                        <?php foreach($tefTypes as $debito): ?>
+                            <?php if($debito == 'tef_bb'): ?>
+                                <option value="tef_bb">Banco do Brasil</option>
+    						<?php endif; ?>
+                            <?php if($debito == 'tef_bradesco'): ?>
+                                <option value="tef_bradesco">Bradesco</option>
+    						<?php endif; ?>
+                            <?php if($debito == 'tef_itau'): ?>
+                                <option value="tef_itau">Itaú</option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
 					</select>
 				</li>
 			</ul>
         </div>
     </li>
+    <?php endif; ?>
     
     <input title="<?php echo $this->__('Check Forma Pagamento') ?>" name="payment[check_formapagamento]" type="hidden" id="<?php echo $_code ?>_check_formapagamento" value="" />
     

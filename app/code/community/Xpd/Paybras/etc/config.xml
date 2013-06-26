@@ -134,15 +134,14 @@
             <paybras>
                 <active>1</active>
                 <model>paybras/standard</model>
-                <title>Cartões de Crédito</title>
-                <mostrar_parcelamento>1</mostrar_parcelamento>
+                <title>Paybras</title>
+                <installments>1</installments>
                 <cctypes>visa,mastercard,elo,amex,diners</cctypes>
+                <teftypes>tef_bb,tef_bradesco,tef_itau</teftypes>
                 <environment>0</environment>
                 <allowspecific>0</allowspecific>
-                <useccv>1</useccv>
-                <captura>1</captura>
-                <ativarlabel>1</ativarlabel>
-                <enablevalidate>1</enablevalidate>
+                <notification>1</notification>
+                <allvalidation>0</allvalidation>
 				<textboleto>Após a confirmação do pedido você poderá gerar e imprimir seu boleto</textboleto>
 				<texttef>Após a confirmação do pedido você será redirecionado para o site do Banco do Brasil</texttef>
             </paybras>
