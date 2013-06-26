@@ -115,6 +115,25 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </texttef>
+                        <allowspecific translate="label">
+                            <label>Pagamento Aplicável para os Seguintes Países</label>
+                            <frontend_type>allowspecific</frontend_type>
+                            <sort_order>9999</sort_order>
+                            <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </allowspecific>
+                        <specificcountry translate="label">
+                            <label>Países Específicos</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <sort_order>99999</sort_order>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </specificcountry>
                     </fields>
                 </paybras>
             </groups>

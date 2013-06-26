@@ -121,7 +121,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $data = new Varien_Object($data);
         }
         $info = $this->getInfoInstance();
-        $additionaldata = array('cc_parcelas' => $data->getCcParcelas(), 'cc_cid_enc' => $info->encrypt($data->getCcCid()), 'cpf_titular' => $data->getCcCpftitular(), 'day_titular' => $data->getCcDobDay(), 'month_titular' => $data->getCcDobMonth(), 'year_titular' => $data->getCcDobYear(), 'tel_titular' => $data->getPhone(), 'forma_pagamento' => $data->getCheckFormapagamento());
+        $additionaldata = array('cc_parcelas' => $data->getCcParcelas(), 'cc_cid_enc' => $info->encrypt($data->getCcCid()), 'cpf_titular' => $data->getCcCpftitular(), 'day_titular' => $data->getCcDobDay(), 'month_titular' => $data->getCcDobMonth(), 'year_titular' => $data->getCcDobYear(), 'tel_titular' => $data->getPhone(), 'forma_pagamento' => $data->getCheckFormapagamento(), 'tef_banco' => $data->getTefBanco());
         $info->setAdditionalData(serialize($additionaldata));
         $info->setCcType($data->getCcType());
         $info->setCcOwner($data->getCcOwner());
@@ -235,7 +235,11 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
         if($additionaldata['forma_pagamento'] == 'tef_bb') {
             $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybras/standard/success/';
+			$fields['pedido_meio_pagamento'] = $additionaldata['tef_banco'];
         }
+		else {
+			$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
+		}
         
         $fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
         $fields['pedido_id'] = $order->getIncrementId();

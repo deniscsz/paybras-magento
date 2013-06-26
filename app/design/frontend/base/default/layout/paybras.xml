@@ -8,11 +8,7 @@
 			<!--action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/scripts.js</name></action-->
         </reference>
     </default>
-    
-    <paybras_index_index>
-    
-    </paybras_index_index>
-    
+        
     <paybras_standard_pagamento>
         <reference name="head">
             <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.js</name></action>
@@ -24,6 +20,9 @@
     </paybras_standard_pagamento>
     
     <checkout_onepage_index>
+		<reference name="head">
+			<action method="addItem" ifconfig="payment/paybras/allvalidation"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
+		</reference>
         <reference name="checkout.onepage.billing">
             <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/persistent/checkout/onepage/billing.phtml</template></action>
         </reference>
@@ -36,6 +35,9 @@
         <reference name="customer_form_register">
             <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/persistent/customer/form/register.phtml</template></action>
         </reference>
+		<reference name="head">
+			<action method="addItem" ifconfig="payment/paybras/allvalidation"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
+		</reference>
     </customer_account_create>
     
     <checkout_onepage_success translate="label">

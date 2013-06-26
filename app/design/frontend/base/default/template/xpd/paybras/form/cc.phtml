@@ -81,7 +81,7 @@ function onCardChange(optElement) {
     else {
         if (selCard == 'amex') {
             $('<?php echo $_code ?>_cc_number').setAttribute('maxlength', 15);
-            //$('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 4);
+            $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 4);
         }
         else {
             $('<?php echo $_code ?>_cc_number').setAttribute('maxlength', 16);
@@ -260,6 +260,18 @@ function numeros(v){
         
         <div id="tef" style="display: none;">
             <p><?php echo Mage::getStoreConfig('payment/paybras/texttef'); ?></p>
+			
+			<ul>
+				<li>
+					<p>Escolha seu banco:</p>
+					<select id="<?php echo $_code ?>_tef_banco" name="payment[tef_banco]" class="tef_banco required-entry">
+						<!--option value="">Selecione ...</option-->
+						<option value="tef_bb">Banco do Brasil</option>
+						<option value="tef_bradesco">Bradesco</option>
+						<option value="tef_itau">Itaú</option>
+					</select>
+				</li>
+			</ul>
         </div>
     </li>
     

@@ -178,3 +178,18 @@
 #li-tef #tef {
 	margin-top: 10px;
 }
+
+#tef select, #tef option {
+	outline: 0 none;
+    clear: both;
+    float: left;
+    font-size: 14px;
+}
+
+#paybras_tef_banco {
+	color: #333;
+	overflow: hidden;
+	height: 30px;
+	padding-top: 5px;
+	width: 250px;
+}

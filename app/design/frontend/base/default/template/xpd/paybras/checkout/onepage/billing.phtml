@@ -56,6 +56,22 @@
                     </div>
         <?php endif ?>
                 </li>
+				
+				<li class="fields">
+                    <div class="field">
+                        <label for="billing:postcode" class="required"><em>*</em><?php echo $this->__('Zip/Postal Code') ?></label>
+                        <div class="input-box">
+                            <input type="text" title="<?php echo $this->__('Zip/Postal Code') ?>" name="billing[postcode]" id="billing:postcode" value="<?php echo $this->htmlEscape($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international required-entry" onblur="buscarEndereco('<?php echo Mage::getBaseUrl(); ?>','billing')" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="billing:country_id" class="required"><em>*</em><?php echo $this->__('Country') ?></label>
+                        <div class="input-box">
+                            <?php echo $this->getCountryHtmlSelect('billing') ?>
+                        </div>
+                    </div>
+                </li>
+				
                 <li class="wide">
                     <label for="billing:street1" class="required"><em>*</em><?php echo $this->__('Address') ?></label>
                     <div class="input-box">
@@ -104,20 +120,7 @@
                         </div>
                     </div>
                 </li>
-                <li class="fields">
-                    <div class="field">
-                        <label for="billing:postcode" class="required"><em>*</em><?php echo $this->__('Zip/Postal Code') ?></label>
-                        <div class="input-box">
-                            <input type="text" title="<?php echo $this->__('Zip/Postal Code') ?>" name="billing[postcode]" id="billing:postcode" value="<?php echo $this->htmlEscape($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international required-entry" />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:country_id" class="required"><em>*</em><?php echo $this->__('Country') ?></label>
-                        <div class="input-box">
-                            <?php echo $this->getCountryHtmlSelect('billing') ?>
-                        </div>
-                    </div>
-                </li>
+                
                 <li class="fields">
                     <div class="field">
                         <label for="billing:fax"><?php echo $this->__('Celular') ?></label>
@@ -215,6 +218,7 @@
     
 	va_tel = new MaskedInput('input[name="billing[telephone]"]', '(99)99999999');
     va_cel = new MaskedInput('input[name="billing[fax]"]', '(99)99999999?9');
+    va_cel2 = new MaskedInput('input[name="billing[celular]"]', '(99)99999999?9');
     va_cep = new MaskedInput('input[name="billing[postcode]"]', '99999-999');
     va_tax = new MaskedInput('input[name="billing[taxvat]"]', '999.999.999-99');
     MaskedInput.definitions['~'] = '[a-zA-Z]';
