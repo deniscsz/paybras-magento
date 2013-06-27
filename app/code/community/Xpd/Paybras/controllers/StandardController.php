@@ -226,16 +226,10 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             }
             $paybras = $this->getStandard();
             
-            //var_dump($transactionId);
-//            var_dump($pedidoId);
-//            var_dump($valor);
-//            var_dump($status_codigo);
-//            var_dump($status_nome);
-//            var_dump($recebedor_api);
-            
             $paybras->log($pedidoId);
             $paybras->log($status_codigo);
-            
+            $paybras->log($transactionId);
+			
             if($transactionId && $status_codigo && $pedidoId) {
                 if(strpos($pedidoId,'_') !== false) {
                     $pedido = explode("_",$pedidoId);
@@ -249,9 +243,15 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                   ->getCollection()
                   ->addAttributeToFilter('increment_id', $orderId)
                   ->getFirstItem();
+				  
+				if(!$order) {
+					$order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+				}
                 
                 $status = (int)$status_codigo;
-                                
+				
+				$paybras->log($order->getId());
+				
                 if($paybras->getEnvironment() == '1') {
                     $url = 'https://service.paybras.com/payment/getStatus';
                 }
@@ -265,8 +265,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                     'transacao_id' => $transactionId,
                     'pedido_id' => $pedidoId
                 );
-                
-                //var_dump($fields);
+				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
                 $curlAdapter->setConfig(array('timeout'   => 20));
                 $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
@@ -280,6 +279,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                         $result = $paybras->processStatus($order,$status,$transactionId);
                         if($result >= 0) {
                             echo '{"retorno"."OK"}';
+							$paybras->log('{"retorno"."OK"}');
                         }
                     }
                 }
@@ -292,6 +292,8 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 $paybras->log($json);
                 echo 'Erro na Captura - Nao foi possivel pergar os dados';
             }
+			
+			$paybras->log('Fim da Captura');
         }
     }
     

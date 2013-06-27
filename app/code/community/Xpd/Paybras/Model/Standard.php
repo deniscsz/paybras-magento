@@ -353,7 +353,6 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                    ->save();
                 $comment = utf8_encode(sprintf('Fatura %s criada.', $invoice->getIncrementId()));
                 $this->changeState($order,$status,NULL,$comment);
-                Mage::getSingleton("core/session")->clear();
                 return 1;
             }
             else {

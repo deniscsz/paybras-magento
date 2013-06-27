@@ -29,10 +29,10 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
 			}
 		}
         
-        if(!$order) {
+        /*if(!$order) {
             $paybras = Mage::getSingleton('paybras/standard');
             $order = $paybras->getOrder(); 
-        }
+        }*/
 
 		return $order;
     }
@@ -74,15 +74,15 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
     /**
      * Gera informações do pagamento para admin.
      */
-    /*protected function _prepareInfo()
+    protected function _prepareInfo()
     {
         $paybras = Mage::getSingleton('paybras/standard');
         if (!$order = $this->getInfo()->getOrder()) {
             $order = $this->getInfo()->getQuote();
         }
-        if(!$order) {
-            $order = $paybras->getOrder();
-        }
+//        if(!$order) {
+//            $order = $paybras->getOrder();
+//        }
         
         $transactionId = $this->getInfo()->getPaybrasTransactionId();
         $url_redirect = $this->getInfo()->getPaybrasOrderId();
@@ -91,16 +91,14 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
         
         $paymentMethod = $data['forma_pagamento'];
         
-        if ($paymentMethod == 'boleto'/* && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)*//*) {
+        if ($paymentMethod == 'boleto' && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)) {
             $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Segunda Via do Boleto</a>)';
         }
         
-        if ($paymentMethod == 'tef_bb'/* && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)*//*) {
+        if ($paymentMethod == 'tef_bb' && ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED || $order->getState() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT)) {
             $paymentMethod .= ' (<a href="' . $url_redirect . '" onclick="this.target=\'_blank\'">Página do BB - TEF</a>)';
         }
-        
-        Mage::log('Payment Method INfo: '.$paymentMethod);
-        
+                
         $this->addData(array(
             'show_paylink' => (boolean) !$transactionId && $order->getState() == Mage_Sales_Model_Order::STATE_NEW,
             'pay_url' => $url_redirect,
@@ -108,6 +106,6 @@ class Xpd_Paybras_Block_Info extends Mage_Payment_Block_Info_Ccsave
             'transaction_id' => $transactionId,
             'payment_method' => $paymentMethod,
         ));
-    }*/
+    }
 }
 

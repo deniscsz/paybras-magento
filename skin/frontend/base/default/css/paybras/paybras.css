@@ -173,10 +173,12 @@
 
 #li-boleto #boleto {
 	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 #li-tef #tef {
 	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 #tef select, #tef option {
