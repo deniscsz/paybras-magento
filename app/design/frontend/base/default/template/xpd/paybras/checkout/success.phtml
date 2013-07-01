@@ -94,4 +94,14 @@ window.setTimeout(function() {
 </script>
 <?php endif; ?>
 
-<?php $session->clear(); ?>
+<?php $session->clear(); 
+
+foreach( Mage::getSingleton('checkout/session')->getQuote()->getItemsCollection() as $item )
+{
+  if ($item->getStore()->getCode() != Mage::app()->getWebsite()->getCode())
+   {
+     Mage::getSingleton('checkout/cart')->removeItem( $item->getId() )->save();
+   }
+}
+
+?>

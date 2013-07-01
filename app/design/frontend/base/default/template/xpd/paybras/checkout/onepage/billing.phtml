@@ -58,16 +58,16 @@
                 </li>
 				
 				<li class="fields">
+					<div class="field">
+                        <label for="billing:country_id" class="required"><em>*</em><?php echo $this->__('Country') ?></label>
+                        <div class="input-box">
+                            <?php echo $this->getCountryHtmlSelect('billing') ?>
+                        </div>
+                    </div>
                     <div class="field">
                         <label for="billing:postcode" class="required"><em>*</em><?php echo $this->__('Zip/Postal Code') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?php echo $this->__('Zip/Postal Code') ?>" name="billing[postcode]" id="billing:postcode" value="<?php echo $this->htmlEscape($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international required-entry" onblur="buscarEndereco('<?php echo Mage::getBaseUrl(); ?>','billing')" />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:country_id" class="required"><em>*</em><?php echo $this->__('Country') ?></label>
-                        <div class="input-box">
-                            <?php echo $this->getCountryHtmlSelect('billing') ?>
                         </div>
                     </div>
                 </li>
