@@ -59,5 +59,15 @@
             </reference>
         </reference>
     </checkout_onepage_success>
-    
+	
+	<checkout_onepage_failure translate="label">
+		<reference name="root">
+            <action method="setTemplate" ifconfig="payment/paybras/active"><template>page/1column.phtml</template></action>
+        </reference>
+		<reference name="content">
+            <reference name="checkout.failure">
+                <action method="setTemplate" ifconfig="payment/paybras/active"><template>xpd/paybras/checkout/failure.phtml</template></action>
+            </reference>
+        </reference>
+    </checkout_onepage_failure>
 </layout>

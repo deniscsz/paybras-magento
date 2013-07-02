@@ -1,3 +1,13 @@
+<?php
+/**
+ * Paybras
+ *
+ * @category   Payments
+ * @package    Xpd_Paybras
+ * @license    OSL v3.0
+ */
+ ?>
+
 <?php Mage::getSingleton('customer/session')->setBeforeAuthUrl($this->getRequest()->getRequestUri());  //save requested URL for later redirection
 if(!Mage::getSingleton('customer/session')->isLoggedIn()) {  // if not logged in
     header("Status: 301");

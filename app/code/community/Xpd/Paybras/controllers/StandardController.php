@@ -150,6 +150,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 			}
 			
 			$payment = $order->getPayment();
+			$session->setOrderRealId($order->getRealOrderId());
 			
 			if($paybras->getEnvironment() == '1') {
 				$url = 'https://service.paybras.com/payment/api/criaTransacao';
@@ -186,6 +187,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 						$code_erro = $json_php->{'mensagem_erro'};
 						$error_msg = Mage::helper('paybras')->msgError($code_erro);
 						$paybras->log('False para consulta. Erro: '.$error_msg);
+						$session->setMsgPaybrasErro($error_msg);
 						$flag = false;
 					}
 					else {
@@ -207,14 +209,15 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 				
 				$session->setFormaPag($fields['pedido_meio_pagamento']);
 				
-				$url = Mage::getUrl('xpd/paybras/standard/repay-success');
+				$url = Mage::getUrl('xpd/paybras/standard/success');
 			}
 			else {
-				$url = Mage::getUrl('xpd/paybras/standard/repay-failure');
+				$url = Mage::getUrl('xpd/paybras/standard/failure');
 			}
+			
+			$this->getResponse()->setRedirect($url);
 		}
 		else {
-			echo 'eita';
 			die();
 		}
 	}
@@ -429,5 +432,46 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         if($nameCustomer && $nameTitular) {
             echo $paybras->comparaNome($nameCustomer,$nameTitular) ? '1' : '0';
         }
+    }
+	
+	/**
+     * Exibe tela de sucesso após tentativa de repagamento
+     * 
+     */
+    public function successAction() {
+		$session = Mage::getSingleton('core/session');
+		$paybras = Mage::getSingleton('paybras/standard');
+		$orderId = $session->getPayOrderId();
+        
+		if(strlen((string)$orderId)<9) {
+			$order = Mage::getModel('sales/order')->load((int)$orderId);
+		}
+		else {
+			$order = Mage::getModel('sales/order')
+				  ->getCollection()
+				  ->addAttributeToFilter('increment_id', $orderId)
+				  ->getFirstItem();
+		}
+		
+		$this->loadLayout();
+		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');			
+		$block = $this->getLayout()->createBlock('Xpd_Paybras_Block_Standard_Success','block_standard_success',array('template' => 'xpd/paybras/standard/success.phtml'));
+		$this->getLayout()->getBlock('content')->append($block);
+		$this->renderLayout();
+    }
+	
+	/**
+     * Exibe tela de falha após tentativa de repagamento
+     * 
+     */
+    public function failureAction() {
+		$session = Mage::getSingleton('core/session');
+		$paybras = Mage::getSingleton('paybras/standard');
+		
+		$this->loadLayout();
+		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+		$block = $this->getLayout()->createBlock('Xpd_Paybras_Block_Standard_Failure','block_standard_failure',array('template' => 'xpd/paybras/standard/failure.phtml'));
+		$this->getLayout()->getBlock('content')->append($block);
+		$this->renderLayout();
     }
 }

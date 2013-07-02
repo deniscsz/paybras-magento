@@ -12,17 +12,7 @@ class Xpd_Paybras_Block_Standard_Pagamento extends Mage_Core_Block_Template {
         parent::_construct();
         $this->setTemplate('xpd/paybras/standard/pagamento.phtml');
     }
-	
-    /*protected function _toHtml(){
-		$this->setTemplate('xpd/paybras/standard/pagamento.phtml');
-        $standard = Mage::getModel('paybras/standard');
-        
-        $html = '';
-        $html .= 'X';
 		
-        return $html;
-    }*/
-	
 	/**
 	 * Analisa o retorno do ajax de parcelamento (variavel de sessão) e retorna as parcelas
 	 * 
