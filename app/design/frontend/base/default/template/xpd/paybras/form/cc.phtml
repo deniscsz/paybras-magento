@@ -24,89 +24,50 @@
 
 <script type="text/javascript">
 
-function verifyType(element) {
-    var ccnum = element.value;
-    var visaReg = /^4\d{3}-?\d{4}-?\d{4}-?\d{4}$/;
-    var masterReg = /^5[1-5]\d{2}-?\d{4}-?\d{4}-?\d{4}$/;
-    var discoverReg = /^6011-?\d{4}-?\d{4}-?\d{4}$/;
-    var amexReg = /^3[47]\d{13}$/;
-    var dinersReg = /^3[068]\d{12}$/;
+    <?php $quote = Mage::getSingleton('checkout/session')->getQuote(); ?>
+    <?php $billingaddress = $quote->getBillingAddress(); ?>
+    <?php $customer = Mage::getSingleton('customer/session')->getCustomer(); ?>
+    <?php $name = $billingaddress->getFirstname() . ' ' . $billingaddress->getLastname(); ?>
     
-    if(visaReg.test(ccnum)) {
-        $('opt-visa').checked = true;
-        $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 3);
-    } else if(masterReg.test(ccnum)) {
-        $('opt-mastercard').checked = true;
-        $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 3);
-    } else if(amexReg.test(ccnum)) {
-        $('opt-amex').checked = true;
-        $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 4);
-    } else if(dinersReg.test(ccnum)) {
-        $('opt-diners').checked = true;
-        $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 3);
-    } else if(discoverReg.test(ccnum)) {
-        //$('opt-visa').checked=true;
-    }
+    nomeComprador = '<?php echo $name; ?>';
+    nomeTitular = '';
     
-    ccnum = ccnum.split("-").join("");
-    
-    var checksum = 0;
-    for (var i=(2-(ccnum.length % 2)); i<=ccnum.length; i+=2) {
-        checksum += parseInt(ccnum.charAt(i-1));
-    }
-    
-    for (var i=(ccnum.length % 2) + 1; i<ccnum.length; i+=2) {
-        var digit = parseInt(ccnum.charAt(i-1)) * 2;
-        if (digit < 10) { checksum += digit; } else { checksum += (digit-9); }
-    }
-    
-    if ((checksum % 10) == 0) {
-        return true;
-    }
-    else {
-        alert('Número do Cartão Inválido');
-        $('paybras_cc_number').value = "";
-        $('paybras_cc_cid').value = "";
-    }
-}
+    new MaskedInput('input[name="payment[cc_cpftitular]"]', '999.999.999-99');
+    new MaskedInput('input[name="payment[cc_phone]"]', '(99)99999999?9');
+        
+        Validation.add('cpftitular','CPF Inválido',function(valueCPF) {
+        var cpf = valueCPF.replace(/[^\d]+/g,'');
+                if(cpf == '') return true;
+                while(cpf.length < 11) cpf = "0"+ cpf;
+                var expReg = /^0+$|^1+$|^2+$|^3+$|^4+$|^5+$|^6+$|^7+$|^8+$|^9+$/;
+                var a = [];
+                var b = new Number;
+                var c = 11;
+                for (i=0; i<11; i++){
+                        a[i] = cpf.charAt(i);
+                        if (i < 9) b += (a[i] * --c);
+                }
+                if ((x = b % 11) < 2) {
+                        a[9] = 0
+                } 
+                else {
+                        a[9] = 11-x
+                }
 
-function onCardChange(optElement) {
-    var meuID = optElement.id;
-    var selCard = optElement.value; 
-    
-    if (selCard == 'diners') {
-        $('<?php echo $_code ?>_cc_number').setAttribute('maxlength', 14);
-        $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 3);
-    }
-    else {
-        if (selCard == 'amex') {
-            $('<?php echo $_code ?>_cc_number').setAttribute('maxlength', 15);
-            $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 4);
-        }
-        else {
-            $('<?php echo $_code ?>_cc_number').setAttribute('maxlength', 16);
-            $('<?php echo $_code ?>_cc_cid').setAttribute('maxlength', 3);
-        }
-    }
+                b = 0;
+                c = 11;
 
-    $('<?php echo $_code ?>_cc_number').value = "";
-    $('<?php echo $_code ?>_cc_cid').value = "";
-}
+                for (y=0; y<10; y++) b += (a[y] * c--);
+                if ((x = b % 11) < 2) {
+                        a[10] = 0;
+                }
+                else {
+                        a[10] = 11-x;
+                }
+                if ((cpf.charAt(9) != a[9]) || (cpf.charAt(10) != a[10]) || cpf.match(expReg)) return false;
+                return true;
+    });
 
-function mascara(o,f) {
-    v_obj=o
-    v_fun=f
-    setTimeout("execmascara()",1)
-}
-
-function execmascara() {
-    v_obj.value=v_fun(v_obj.value)
-}
-
-function numeros(v){
-    v=v.replace(/\D/g,"")
-    return v
-}
 
 </script>
 <fieldset class="form-list">
@@ -121,11 +82,6 @@ function numeros(v){
 
         <li  style="display: block">
             <div class="input-box" style="width: 100%;">
-                
-                <!--div style="width: 99.5%; height: 25px;">
-                <label for="card-logo" class="required"><em>*</em><?php echo $this->__('Selecione sua Bandeira') ?></label>
-                </div-->
-                
                 <ul class="card-logo">
         		<?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
         			<li id="li-card-<?php echo $_typeCode ?>" class="seleciona-bandeiras-cards">
@@ -140,7 +96,7 @@ function numeros(v){
         <li>
             <div class="input-box">
                 <label for="<?php echo $_code ?>_cc_owner" class="required"><em>*</em><?php echo $this->__('Name on Card') ?></label><br />
-                <input type="text" title="<?php echo $this->__('Name on Card') ?>" class="input-text required-entry" id="<?php echo $_code ?>_cc_owner" name="payment[cc_owner]" value="<?php echo $this->htmlEscape($this->getInfoData('cc_owner')) ?>" onblur="comparaNome(this.value);"/>
+                <input type="text" title="<?php echo $this->__('Name on Card') ?>" class="input-text required-entry" id="<?php echo $_code ?>_cc_owner" name="payment[cc_owner]" value="<?php echo $this->htmlEscape($this->getInfoData('cc_owner')) ?>" onblur="comparaNome(this.value,'<?php echo Mage::getBaseUrl(); ?>');"/>
             </div>
         </li>
         <li>
@@ -288,131 +244,3 @@ function numeros(v){
     
 </ul>
 </fieldset>
-<script type="text/javascript">
-    function attrName(element) {
-        nomeTitular = element.value;
-    }
-    
-    function toggleBoleto() {
-    	document.getElementById("<?php echo $_code ?>_check_formapagamento").value = "boleto";
-        
-        var cc =  document.getElementById('cc');
-        if(typeof(cc) != 'undefined' && cc != null) {
-            document.getElementById("cc").style.display="none";
-        }
-        
-        var tef = document.getElementById('tef');
-        if(typeof(tef) != 'undefined' && tef != null) {
-            document.getElementById("tef").style.display="none";
-        }
-        
-        document.getElementById("boleto").style.display="block";
-    }
- 
-    function toggleCard() {
-        document.getElementById("<?php echo $_code ?>_check_formapagamento").value = "cartao";
-        
-        var tef = document.getElementById('tef');
-        if(typeof(tef) != 'undefined' && tef != null) {
-            document.getElementById("tef").style.display="none";
-        }
-        
-        document.getElementById("boleto").style.display="none";
-        
-        var cc =  document.getElementById('cc');
-        if(typeof(cc) != 'undefined' && cc != null) {
-            document.getElementById("cc").style.display="block";
-        }
-	}
- 
-    function toggleTef() {
-        document.getElementById("<?php echo $_code ?>_check_formapagamento").value = "tef_bb";
-
-        var cc =  document.getElementById('cc');
-        if(typeof(cc) != 'undefined' && cc != null) {
-            document.getElementById("cc").style.display="none";
-        }
-
-        var tef = document.getElementById('tef');
-        if(typeof(tef) != 'undefined' && tef != null) {
-            document.getElementById("tef").style.display="block";
-        }
-        
-        document.getElementById("boleto").style.display="none";
-    }
-    
-    function comparaNome(nomeTitular) {
-        if(document.getElementById("billing:firstname") && document.getElementById("billing:lastname")) {
-            nomeComprador = document.getElementById("billing:firstname").value + ' ' + document.getElementById("billing:lastname").value;
-        }
-        
-        new Ajax.Request('<?php echo Mage::getBaseUrl(); ?>paybras/standard/compara?nome='+nomeComprador+'&titular='+nomeTitular+'', {
-            method:'get',
-            onSuccess: function(transport) {
-                var response = transport.responseText || -1;
-                
-                if(response == 1) {
-                    document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="none";
-                    document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="none";
-                    document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="none";
-                }
-                else {
-					document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
-					document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
-					document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
-                }
-            },
-            onFailure: function() { 
-				document.getElementById("<?php echo $_code ?>_cc_cpftitular_div").style.display="block";
-				document.getElementById("<?php echo $_code ?>_cc_phone_div").style.display="block";
-				document.getElementById("<?php echo $_code ?>_cc_type_dob_div").style.display="block";
-			}
-        });
-    }
-    
-    <?php $quote = Mage::getSingleton('checkout/session')->getQuote(); ?>
-    <?php $billingaddress = $quote->getBillingAddress(); ?>
-    <?php $customer = Mage::getSingleton('customer/session')->getCustomer(); ?>
-    <?php $name = $billingaddress->getFirstname() . ' ' . $billingaddress->getLastname(); ?>
-    
-    nomeComprador = '<?php echo $name; ?>';
-    nomeTitular = '';
-    
-    new MaskedInput('input[name="payment[cc_cpftitular]"]', '999.999.999-99');
-    new MaskedInput('input[name="payment[cc_phone]"]', '(99)99999999?9');
-	
-	Validation.add('cpftitular','CPF Inválido',function(valueCPF) {
-        var cpf = valueCPF.replace(/[^\d]+/g,'');
-		if(cpf == '') return true;
-		while(cpf.length < 11) cpf = "0"+ cpf;
-		var expReg = /^0+$|^1+$|^2+$|^3+$|^4+$|^5+$|^6+$|^7+$|^8+$|^9+$/;
-		var a = [];
-		var b = new Number;
-		var c = 11;
-		for (i=0; i<11; i++){
-			a[i] = cpf.charAt(i);
-			if (i < 9) b += (a[i] * --c);
-		}
-		if ((x = b % 11) < 2) {
-			a[9] = 0
-		} 
-		else {
-			a[9] = 11-x
-		}
-
-		b = 0;
-		c = 11;
-
-		for (y=0; y<10; y++) b += (a[y] * c--);
-		if ((x = b % 11) < 2) {
-			a[10] = 0;
-		}
-		else {
-			a[10] = 11-x;
-		}
-		if ((cpf.charAt(9) != a[9]) || (cpf.charAt(10) != a[10]) || cpf.match(expReg)) return false;
-		return true;
-    });
-    
-    //});
-</script>

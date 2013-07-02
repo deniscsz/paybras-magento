@@ -100,19 +100,11 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     public function getToken() {
         return Mage::getStoreConfig('payment/paybras/token');
     }
-    
-    /**
-     * Retorna Transação
-     * 
-     * @return string
-     */
-    public function getTXoken() {
-        return Mage::getStoreConfig('payment/paybras/token');
-    }
-    
+        
     /**
      * Sobrecarga da função assignData, acrecentado dados adicionais.
      * 
+	 * @param $data - Informação adiquirida do método de pagamento.
      * @return Mage_Payment_Model_Method_Cc
      */
     public function assignData($data) {
@@ -142,9 +134,12 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Recupera os dados necessários para a criacão de uma transação
      * 
+	 * @param $customer - Objeto Cliente
+	 * @param $order - Objeto Pedido
+	 * @param $payment - Objeto do Pagamento do pedido
      * @return array
      */
-    public function dataTransaction($customer,$order,$payment) {
+    public function dataTransaction($customer,$order,$payment,$post = NULL) {
         $fields = Array();
         
         /* Dados do Recebedor */
@@ -241,7 +236,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 			$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
 		}
         
-        $fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
+        //$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
         $fields['pedido_id'] = $order->getIncrementId();
         $fields['pedido_valor_total_original'] = number_format($order->getGrandTotal(), 2, '.', '');
         
@@ -325,13 +320,43 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $count += 1;
         }
         $fields['pedido_moeda'] = Mage::app()->getStore()->getCurrentCurrencyCode();
-        
+		
+		if($post) {
+			$fields['cartao_portador_nome'] = $post['cartao_portador_nome'];
+            $fields['cartao_numero'] = $post['cartao_numero'];
+            $fields['cartao_bandeira'] = $post['cc_type'];
+            $fields['cartao_validade_mes'] = $post['cartao_validade_mes'];
+            $fields['cartao_validade_ano'] = $post['cartao_validade_ano'];
+            $fields['cartao_parcelas'] = $post['cartao_parcelas'];
+            $fields['cartao_codigo_de_seguranca'] = $post['cartao_codigo_de_seguranca'];
+			$fields['pedido_id'] = $order->getIncrementId().'_1';
+            
+            $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
+            if(!$samePerson) {
+                $telefone = $post['cartao_portador_telefone'];
+				if($telefone) {
+					$telefone = str_replace(')','',str_replace('(','',$telefone)); 
+					$fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
+					$fields['cartao_portador_telefone'] = substr($telefone,2);
+				}
+                if($post['cartao_portador_cpf']) {
+					$fields['cartao_portador_cpf'] = $post['cartao_portador_cpf'];
+				}
+				if($post['cartao_portador_data_de_nascimento']) {
+					$fields['cartao_portador_data_de_nascimento'] = $post['cartao_portador_data_de_nascimento'];
+				}
+            }
+		}
+		
         return $fields;
     }
     
     /**
      * Analisa o status e em caso de pagamento aprovado, cria a fatura. No caso do status recusado ou não aprovado, cancela o pedido.
-     * 
+	 *
+     * @param object $order - Objeto do Pedido
+	 * @param integer $status - Status do Pedido 
+	 * @param string $transactionId - ID da transação junto a Paybras
      * @return integer
      */
     public function processStatus($order,$status,$transactionId) {
@@ -341,12 +366,13 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         	}
             if ($order->canInvoice()) {
                 $invoice = $order->prepareInvoice();
-                $invoice->register()->pay();
                 $invoice_msg = utf8_encode(sprintf('Pagamento confirmado. Transa&ccedil;&atilde;o: %s', $transactionId));
                 $invoice->addComment($invoice_msg, true);
                 $invoice->sendEmail(true, $invoice_msg);
+				$invoice->register()->pay();
                 $invoice->setEmailSent(true);
-                
+                //$invoice->save();
+				
                 Mage::getModel('core/resource_transaction')
                    ->addObject($invoice)
                    ->addObject($invoice->getOrder())
@@ -395,6 +421,10 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Altera estado de um pedido
      * 
+	 * @param object $order - Objeto do Pedido
+	 * @param integer $cod_state - Código do Estado do Pedido
+	 * @param string $status - Status do Pedido
+	 * @param $comment - Comentário/Observação
      */
     public function changeState($order,$cod_state,$status,$comment) {
         $state = $this->convertState($cod_state);
@@ -408,15 +438,16 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Converte número de state da Paybras para estado do Magento
      * 
+	 * @param integer $num - Número do código do status da Paybras
      * @return Mage_Sales_Model_Order
      */
     public function convertState($num) {
         switch($num) {
             case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
-            case 2: return Mage_Sales_Model_Order::STATE_HOLDED;
-            case 3: return Mage_Sales_Model_Order::STATE_CANCELED;
+            case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
+            case 3: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
             case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
-            case 5: return Mage_Sales_Model_Order::STATE_CANCELED;
+            case 5: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;//Mage_Sales_Model_Order::STATE_CANCELED;
             default: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
         }
     }
@@ -424,16 +455,17 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Converte número de status da Paybras para status do Magento
      * 
+	 * @param integer $num - Número do código do status da Paybras
      * @return string
      */
     public function convertStatus($num) {
         $num = (int)$num;
         switch($num) {
             case 1: return 'pending_payment';
-            case 2: return 'holded';
-            case 3: return 'canceled';
+            case 2: return 'holded';//'holded';
+            case 3: return 'pending_payment';//'canceled';
             case 4: return 'processing';
-            case 5: return 'canceled';
+            case 5: return 'pending_payment';//'canceled';
             default: return 'pending_payment';
         }
     }
@@ -441,6 +473,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Remove acentos e caracteres especiais
      * 
+	 * @param string
      * @return string
      */
     public function removeInvalidos($str) {
@@ -465,6 +498,8 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     /**
      * Compara nomes semelhantes
      * 
+	 * @param string Nome
+	 * @param string Nome
      * @return boolean
      */
     public function comparaNome($nomecartao, $nomepessoa) {
@@ -539,6 +574,10 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
     }
     
+	/**
+	 * Validação server side das informações do formulário do pagamento.
+	 *
+	 */
     public function validate() {
     	parent::validate();
         
@@ -560,41 +599,11 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     		Mage::throwException($errorMsg);
     	}
         
-        
     	if($additionaldata['forma_pagamento'] == "cartao") {
     		if(empty($cartaobandeira) || empty($nomecartao) || empty($numerocartao) || empty($expiracaomes) || empty($expiracaoano) || empty($codseguranca)) {
                 $errorCode = 'invalid_data';
                 $errorMsg = $this->_getHelper()->__('Campos de preenchimento obrigatório');
                 
-                /*if(!$this->isCpfValid($cpf)) {
-                    $errorCode = 'invalid_data';
-                    $errorMsg = $this->_getHelper()->__('CPF inválido.');
-
-                    #gera uma exception caso nenhuma forma de pagamento seja selecionada
-                    Mage::throwException($errorMsg);
-                }*/
-
-                /*$validCartao = $this->validaNumeroDoCartao($numerocartao, $codseguranca, $cartaobandeira);
-                
-                if(!$validCartao) {
-                    $errorCode = 'invalid_data';
-                    $errorMsg = $this->_getHelper()->__('Cartão inválido. Revise os dados informados e tente novamente.');
-
-                    #gera uma exception caso nenhuma forma de pagamento seja selecionada
-                    Mage::throwException($errorMsg);
-                }*/
-
-                /*$validadataCartao = $this->validaDataCartaoDeCredito($expiracaomes, $expiracaoano);
-                
-                if(! $validadataCartao) {
-                    $errorCode = 'invalid_data';
-                    $errorMsg = $this->_getHelper()->__('Cartão vencido. Revise os dados de expiracao e envie novamente.');
-
-                    #gera uma exception caso nenhuma forma de pagamento seja selecionada
-                    Mage::throwException($errorMsg);
-                }*/
-
-                #gera uma exception caso os campos do cartão nao forem preenchidos
                 Mage::throwException($errorMsg);
             }
     	}

@@ -5,20 +5,29 @@
         <reference name="head">
             <action method="addItem" ifconfig="payment/paybras/active"><type>skin_css</type><name>css/paybras/paybras.css</name></action>
             <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/prototype.maskedinput.js</name></action>
-			<!--action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/scripts.js</name></action-->
+			<action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
         </reference>
     </default>
         
     <paybras_standard_pagamento>
         <reference name="head">
             <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.js</name></action>
-            <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.mask.min.js</name></action>
-            <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/bootstrap.min.js</name></action>
-            <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.validate.min.js</name></action>
+			<action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/noConflict.js</name></action>
+            <!--action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.mask.min.js</name></action>
+            <action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/jquery.validate.min.js</name></action-->
             <action method="addItem" ifconfig="payment/paybras/active"><type>skin_css</type><name>css/paybras/style.css</name></action>
+			<action method="addItem" ifconfig="payment/paybras/active"><type>skin_css</type><name>css/paybras/bootstrap.css</name></action>
+			<action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/bootstrap.min.js</name></action>
+			<action method="addItem" ifconfig="payment/paybras/active"><type>skin_js</type><name>js/paybras/scripts.js</name></action>
         </reference>
     </paybras_standard_pagamento>
     
+	<customer_account_index>
+        <reference name="customer_account_dashboard_top">
+            <action method="setTemplate" ifconfig="payment/paybras/repay"><template>xpd/paybras/sales/order/recent.phtml</template></action>
+        </reference>
+    </customer_account_index>
+	
     <checkout_onepage_index>
 		<reference name="head">
 			<action method="addItem" ifconfig="payment/paybras/allvalidation"><type>skin_js</type><name>js/paybras/paybras.js</name></action>

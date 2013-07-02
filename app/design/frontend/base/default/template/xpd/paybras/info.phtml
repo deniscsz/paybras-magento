@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Paybras
  *
@@ -9,7 +9,7 @@
  ?>
 <?php $additionaldata = unserialize($this->getInfo()->getData('additional_data')); ?>
 <?php if($additionaldata["forma_pagamento"] == 'cartao'):?>
-<strong><?php echo $this->getMethod()->getTitle(); ?></strong>
+<p style="margin: 0;">Cartão de Crédito</p>
 <p style="margin: 0;"><?php echo $this->__('Name on the Card: %s', $this->htmlEscape($this->getInfo()->getCcOwner())) ?></p>
 <p style="margin: 0;"><?php echo $this->__('Credit Card Type: %s', $this->htmlEscape($this->getCcTypeName())) ?></p>
 <p style="margin: 0;"><?php echo $this->__('Credit Card Number: xxxx-%s', $this->htmlEscape($this->getInfo()->getCcLast4())) ?></p>

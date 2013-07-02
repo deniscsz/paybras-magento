@@ -48,7 +48,6 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         $orderId = $order->getId();
         
         $payment = $order->getPayment();
-        //Mage::register('current_order',$order);
         
         if($order->getCustomerId()) {
             $customer = Mage::getModel('customer/customer')->load($order->getCustomerId());
@@ -58,19 +57,13 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         }
 
         $fields = $paybras->dataTransaction($customer,$order,$payment);
-        //var_dump($fields);
+        
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
         $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
-        
-        //echo '<br/>';
-//        echo '<br/>';
-        //var_dump($resposta);
-//        echo '<br/>';
-//        echo '<br/>';
         
         if(function_exists('json_decode')) {
             $json_php = json_decode($retorno);
@@ -93,7 +86,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             }
         }
         else {
-            $evolucard->log('[ Function Json_Decode does not exist! Upgrade PHP ]');
+            $paybras->log('[ Function Json_Decode does not exist! Upgrade PHP ]');
         }
         
         if($flag) {
@@ -111,7 +104,10 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                     $session->setUrlRedirect($url_redirect);
                     $payment->setPaybrasOrderId($url_redirect)->save();
                 }
-            }
+            } elseif($fields['pedido_meio_pagamento'] == 'cartao') {
+				$url_redirect = Mage::getBaseUrl() . 'paybras/standard/pagamento/order_id/' . $orderId;
+				$payment->setPaybrasOrderId($url_redirect)->save();
+			}
             
             $url = Mage::getUrl('checkout/onepage/success');
         }
@@ -133,13 +129,104 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         //$session->unsUrlRedirect();
     }
     
+	/**
+     * Processa nova tentativa de pagamento
+     * 
+     */
+    public function repayAction() {
+		if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybras/repay')) {
+			$session = Mage::getSingleton('core/session');
+			$paybras = Mage::getSingleton('paybras/standard');
+			$orderId = $session->getPayOrderId();
+			
+			if(strlen((string)$orderId)<9) {
+				$order = Mage::getModel('sales/order')->load((int)$orderId);
+			}
+			else {
+				$order = Mage::getModel('sales/order')
+					  ->getCollection()
+					  ->addAttributeToFilter('increment_id', $orderId)
+					  ->getFirstItem();
+			}
+			
+			$payment = $order->getPayment();
+			
+			if($paybras->getEnvironment() == '1') {
+				$url = 'https://service.paybras.com/payment/api/criaTransacao';
+			}
+			else {
+				$url = 'https://sandbox.paybras.com/payment/api/criaTransacao';
+			}
+			
+			if($order->getCustomerId()) {
+				$customer = Mage::getModel('customer/customer')->load($order->getCustomerId());
+			}
+			else {
+				$customer = false;
+			}
+
+			$fields = $paybras->dataTransaction($customer,$order,$payment,$_POST);
+			
+			$curlAdapter = new Varien_Http_Adapter_Curl();
+			$curlAdapter->setConfig(array('timeout'   => 20));
+			$curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+			$resposta = $curlAdapter->read();
+			$retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
+			$curlAdapter->close();
+			
+			if(function_exists('json_decode')) {
+				$json_php = json_decode($retorno);
+				
+				if($json_php->{'sucesso'} == '1') {
+					$paybras->log('True para consulta');
+					$flag = true;
+				}
+				else {
+					if($json_php->{'sucesso'} == '0') {
+						$code_erro = $json_php->{'mensagem_erro'};
+						$error_msg = Mage::helper('paybras')->msgError($code_erro);
+						$paybras->log('False para consulta. Erro: '.$error_msg);
+						$flag = false;
+					}
+					else {
+						$paybras->log('Null para consulta '. $json_php->{'code'});
+						$flag = NULL;
+					}
+				}
+			}
+			else {
+				$paybras->log('[ Function Json_Decode does not exist! Upgrade PHP ]');
+			}
+			
+			if($flag) {
+				$transactionId = $json_php->{'transacao_id'};
+				$status_codigo = $json_php->{'status_codigo'};
+				
+				$payment->setPaybrasTransactionId(utf8_encode($transactionId))->save();
+				$paybras->processStatus($order,$status_codigo,$transactionId);
+				
+				$session->setFormaPag($fields['pedido_meio_pagamento']);
+				
+				$url = Mage::getUrl('xpd/paybras/standard/repay-success');
+			}
+			else {
+				$url = Mage::getUrl('xpd/paybras/standard/repay-failure');
+			}
+		}
+		else {
+			echo 'eita';
+			die();
+		}
+	}
+	
     /**
      * Nova tentativa de pagamento
      * 
      */
     public function pagamentoAction() {
-        $session = Mage::getSingleton('checkout/session');
+		Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*'));
         $paybras = Mage::getSingleton('paybras/standard');
+		$session = Mage::getSingleton('core/session');
         
         if($this->getRequest()->getParam('order_id')) {
             $orderId = $this->getRequest()->getParam('order_id');
@@ -159,39 +246,69 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                   ->getFirstItem();
         }
         
-        if($order && $order->getPayment()->getMethod() == $paybras->getCode()) {
-            var_dump($order->getState());
+		$order_payment = $order->getPayment();
+		
+        if($order && $paybras->getCode() == $order_payment->getMethodInstance()->getCode()) {
             switch ($order->getState()) {
-                case 2:
-                    Mage::getSingleton("core/session")->setPayOrderId($orderId);
-                    $order_redirect = true;
+                case Mage_Sales_Model_Order::STATE_PROCESSING:
+                    $order_redirect = false;
                     break;
-                case Mage_Sales_Model_Order::STATE_PENDING_PAYMENT:
-                    Mage::getSingleton("core/session")->setPayOrderId($orderId);
-                    $order_redirect = true;
+				case Mage_Sales_Model_Order::STATE_COMPLETE:
+                    $order_redirect = false;
+                    break;
+				case Mage_Sales_Model_Order::STATE_CLOSED:
+                    $order_redirect = false;
+                    break;
+				case Mage_Sales_Model_Order::STATE_CANCELED:
+                    $order_redirect = false;
                     break;
                 default:
-                    $order_redirect = false;
+                    $order_redirect = true;
+					$session->setPayOrderId($orderId);
                     break;
             }
         }
         else {
             $order_redirect = false;
         }
+		
+		/* Renova Parcelamento */
+		if($paybras->getEnvironment()) {
+            $url = 'https://service.paybras.com/payment/getParcelas';
+        }
+        else {
+            $url = 'https://sandbox.paybras.com/payment/getParcelas';
+        }
         
-        var_dump($order_redirect);
+		$_totalData = $order->getData();
+		$total = $_totalData['grand_total'];
         
-        //if($order_redirect === false) {
-//            $this->_redirect('');
-//        }
-//        else {
+        $fields = Array();
+        $fields['recebedor_email'] = $paybras->getEmailStore();
+        $fields['recebedor_api_token'] = $paybras->getToken();
+        $fields['pedido_valor_total'] = $total;
+        
+        $curlAdapter = new Varien_Http_Adapter_Curl();
+        $curlAdapter->setConfig(array('timeout'   => 20));
+        //$curlAdapter->connect(your_host[, opt_port, opt_secure]);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $resposta = $curlAdapter->read();
+        $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
+        $curlAdapter->close();
+        $session->setMyParcelamentoRe($retorno);
+		$session->setMyParcelamentoTotal($total);
+        /* Fim Parcelamento */
+		
+        if($order_redirect === false) {
+            $this->_redirect('');
+        }
+        else {
             $this->loadLayout();
-    		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
-            $this->getLayout()->getBlock('content')->append($this->getLayout()->createBlock('pay/standard_pagamento'));
-    		//$this->getLayout()->getBlock('content')->append($this->getLayout()->createBlock('paybras/standard_pagamento'));
-            //Zend_Debug::dump($this->getLayout()->getUpdate()->getHandles());
-            $this->renderLayout();
-//        }
+    		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');			
+			$block = $this->getLayout()->createBlock('Xpd_Paybras_Block_Standard_Pagamento','block_standard_pagamento',array('template' => 'xpd/paybras/standard/pagamento.phtml'));
+			$this->getLayout()->getBlock('content')->append($block);
+			$this->renderLayout();
+        }
     }
     
     /**
@@ -226,9 +343,9 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             }
             $paybras = $this->getStandard();
             
-            $paybras->log($pedidoId);
-            $paybras->log($status_codigo);
-            $paybras->log($transactionId);
+            $paybras->log('Pedido ID: '.$pedidoId);
+            $paybras->log('Status: '.$status_codigo);
+            $paybras->log('Transaction ID: '.$transactionId);
 			
             if($transactionId && $status_codigo && $pedidoId) {
                 if(strpos($pedidoId,'_') !== false) {
@@ -275,17 +392,22 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 
                 $json = json_decode($retorno);
                 if($json->{'sucesso'} == '1') {
-                    if($json->{'pedido_id'} == $pedidoIdVerifica && $json->{'valor_total'} == $valor && $json->{'status_codigo'} == $status_codigo) {
+                    if($json->{'pedido_id'} == $pedidoIdVerifica /*&& $json->{'valor_original'} == $valor*/ && $json->{'status_codigo'} == $status_codigo) {
                         $result = $paybras->processStatus($order,$status,$transactionId);
                         if($result >= 0) {
                             echo '{"retorno"."OK"}';
 							$paybras->log('{"retorno"."OK"}');
                         }
                     }
+					else {
+						$paybras->log('Informações do pedido não bateram');
+					}
                 }
                 else {
                     $paybras->log('Erro resposta de Consulta');
                 }
+				
+				Mage::log('teste json: '.$json->{'valor_original'}. ' Z '. $valor);
             }
             else {
                 $paybras->log('Erro na Captura - Nao foi possivel pergar os dados');
