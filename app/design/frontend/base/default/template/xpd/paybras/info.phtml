@@ -24,7 +24,7 @@
 <p style="margin: 0;">Boleto Bancário</p>
 <?php if($this->getRequest()->getControllerName() != 'onepage' && $this->getRequest()->getControllerName() != 'onepagecheckout'): ?>
 <?php if($this->returnUrlToRedirect()): ?>
-<p style="margin: 0;"><a href="<?php echo $this->returnUrlToRedirect(); ?>">Segunda via</a></p>
+<p style="margin: 0;"><a href="<?php echo $this->returnUrlToRedirect(); ?>" target="_blank">Segunda via</a></p>
 <?php endif; ?>
 <?php if($this->returnTransaction()): ?>
 <p style="margin: 0;"><?php echo $this->__('Código da transação: %s', $this->returnTransaction()) ?></p>
@@ -36,7 +36,7 @@
 <p style="margin: 0;">TEF via Banco do Brasil</p>
 <?php if($this->getRequest()->getControllerName() != 'onepage' && $this->getRequest()->getControllerName() != 'onepagecheckout'): ?>
 <?php if($this->returnUrlToRedirect()): ?>
-<p style="margin: 0;"><a href="<?php echo $this->returnUrlToRedirect(); ?>">Link para pagamento</a></p>
+<p style="margin: 0;"><a href="<?php echo $this->returnUrlToRedirect(); ?>" target="_blank">Link para pagamento</a></p>
 <?php endif; ?>
 <?php if($this->returnTransaction()): ?>
 <p style="margin: 0;"><?php echo $this->__('Código da transação: %s', $this->returnTransaction()) ?></p>

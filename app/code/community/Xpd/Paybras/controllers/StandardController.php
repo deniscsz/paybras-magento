@@ -392,7 +392,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 
                 $json = json_decode($retorno);
                 if($json->{'sucesso'} == '1') {
-                    if($json->{'pedido_id'} == $pedidoIdVerifica /*&& $json->{'valor_original'} == $valor*/ && $json->{'status_codigo'} == $status_codigo) {
+                    if($json->{'pedido_id'} == $pedidoIdVerifica && $json->{'valor_original'} == $valor && $json->{'status_codigo'} == $status_codigo) {
                         $result = $paybras->processStatus($order,$status,$transactionId);
                         if($result >= 0) {
                             echo '{"retorno"."OK"}';
@@ -406,8 +406,6 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 else {
                     $paybras->log('Erro resposta de Consulta');
                 }
-				
-				Mage::log('teste json: '.$json->{'valor_original'}. ' Z '. $valor);
             }
             else {
                 $paybras->log('Erro na Captura - Nao foi possivel pergar os dados');
@@ -417,20 +415,6 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 			
 			$paybras->log('Fim da Captura');
         }
-    }
-    
-    /**
-     * Exibe tela de sucesso após tentativa de repagamento
-     * 
-     */
-    public function successAction() {
-        $orderId = $this->getRequest()->getParam('order_id');
-        $order = Mage::getModel('sales/order')->load($orderId);
-                                
-        if ($order) {
-            Mage::getSingleton('checkout/session')->getQuote()->setIsActive(false)->save();
-            $this->_redirect('checkout/onepage/success', array('_secure' => true));
-        }     
     }
     
     /**
