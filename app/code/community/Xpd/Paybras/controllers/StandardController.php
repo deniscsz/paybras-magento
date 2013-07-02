@@ -395,8 +395,8 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                     if($json->{'pedido_id'} == $pedidoIdVerifica && $json->{'valor_original'} == $valor && $json->{'status_codigo'} == $status_codigo) {
                         $result = $paybras->processStatus($order,$status,$transactionId);
                         if($result >= 0) {
-                            echo '{"retorno"."OK"}';
-							$paybras->log('{"retorno"."OK"}');
+                            echo '{"retorno":"OK"}';
+							$paybras->log('{"retorno":"OK"}');
                         }
                     }
 					else {

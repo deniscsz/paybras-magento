@@ -189,6 +189,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         if($order->getCustomerDob()) {
             $dateTimestamp = Mage::getModel('core/date')->timestamp(strtotime($order->getCustomerDob())) + 15000;
             $fields['pagador_data_nascimento'] = date('d-m-Y', $dateTimestamp);
+			$fields['pagador_data_nascimento'] = str_replace('-','/',$celular);
         }
         
         $telefone = $billingAddress->getData('telephone');
@@ -357,9 +358,10 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @param object $order - Objeto do Pedido
 	 * @param integer $status - Status do Pedido 
 	 * @param string $transactionId - ID da transação junto a Paybras
+	 * @param integer
      * @return integer
      */
-    public function processStatus($order,$status,$transactionId) {
+    public function processStatus($order,$status,$transactionId,$repay = NULL) {
         if ($status == 4) {
             if ($order->canUnhold()) {
         	    $order->unhold();
@@ -378,7 +380,8 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                    ->addObject($invoice->getOrder())
                    ->save();
                 $comment = utf8_encode(sprintf('Fatura %s criada.', $invoice->getIncrementId()));
-                $this->changeState($order,$status,NULL,$comment);
+                $order = $this->changeState($order,$status,NULL,$comment);
+				$order->save();
                 return 1;
             }
             else {
@@ -392,9 +395,9 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             }
             if ($order->canCancel()) {
                 $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
-        		$this->changeState($order,$status,NULL,$order_msg);
-        		$order->cancel();
-                $this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+        		$order = $this->changeState($order,$status,NULL,$order_msg);
+				$order->save();
+        		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;
             }
             else {
@@ -404,13 +407,16 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
         elseif($status == 2) {
             $order_msg = "Pedido em análise. Transação: ". $transactionId;
-    		$this->changeState($order,$status,NULL,$order_msg);
+    		$order = $this->changeState($order,$status,NULL,$order_msg);
+			$order->save();
+			
             $this->log("Pedido em analise: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
             return 0;
         }
         elseif($status == 1) {
             $order_msg = "Aguardando Pagamento. Transação: ". $transactionId;
-    		$this->changeState($order,$status,NULL,$order_msg);
+    		$order = $this->changeState($order,$status,NULL,$order_msg);
+			$order->save();
             $this->log("Aguardando Pagamento, pedido: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
             return 0;
         }
@@ -425,14 +431,19 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 	 * @param integer $cod_state - Código do Estado do Pedido
 	 * @param string $status - Status do Pedido
 	 * @param $comment - Comentário/Observação
+	 * @return Mage_Sales_Model_Order
      */
-    public function changeState($order,$cod_state,$status,$comment) {
+    public function changeState($order,$cod_state,$status,$comment,$repay = NULL) {
         $state = $this->convertState($cod_state);
         $status = $this->convertStatus($cod_state);
 
         $order->setState($state, $status, $comment, true);
-        $order->getPayment()->setMessage($comment);    
-        $order->save();
+        $order->getPayment()->setMessage($comment);
+		if($state == Mage_Sales_Model_Order::STATE_CANCELED) {
+			$order->cancel();
+		}
+		
+		return $order;
     }
     
     /**
@@ -441,15 +452,27 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 	 * @param integer $num - Número do código do status da Paybras
      * @return Mage_Sales_Model_Order
      */
-    public function convertState($num) {
-        switch($num) {
-            case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
-            case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
-            case 3: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
-            case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
-            case 5: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;//Mage_Sales_Model_Order::STATE_CANCELED;
-            default: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
-        }
+    public function convertState($num,$repay = NULL) {
+		if($repay) {
+			switch($num) {
+				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
+				case 3: return Mage_Sales_Model_Order::STATE_CANCELED;
+				case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
+				case 5: return Mage_Sales_Model_Order::STATE_CANCELED;
+				default: return Mage_Sales_Model_Order::STATE_CANCELED;
+			}
+		}
+		else {
+			switch($num) {
+				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
+				case 3: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
+				case 5: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;//Mage_Sales_Model_Order::STATE_CANCELED;
+				default: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+			}
+		}
     }
     
     /**
@@ -458,16 +481,28 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 	 * @param integer $num - Número do código do status da Paybras
      * @return string
      */
-    public function convertStatus($num) {
+    public function convertStatus($num,$repay = NULL) {
         $num = (int)$num;
-        switch($num) {
-            case 1: return 'pending_payment';
-            case 2: return 'holded';//'holded';
-            case 3: return 'pending_payment';//'canceled';
-            case 4: return 'processing';
-            case 5: return 'pending_payment';//'canceled';
-            default: return 'pending_payment';
-        }
+		if($repay) {
+			switch($num) {
+				case 1: return 'pending_payment';
+				case 2: return 'holded';
+				case 3: return 'canceled';//'canceled';
+				case 4: return 'processing';
+				case 5: return 'canceled';//'canceled';
+				default: return 'canceled';
+			}
+		}
+		else {
+			switch($num) {
+				case 1: return 'pending_payment';
+				case 2: return 'holded';
+				case 3: return 'pending_payment';
+				case 4: return 'processing';
+				case 5: return 'pending_payment';
+				default: return 'pending_payment';
+			}
+		}
     }
     
     /**
