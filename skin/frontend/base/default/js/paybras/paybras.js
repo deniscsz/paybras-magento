@@ -158,7 +158,9 @@ function numeros(v){
 }
 
 function verifyType(element) {
+    //alert(element);
     var ccnum = element.value;
+    //var ccnum = element.getAttribute('value');
     var visaReg = /^4\d{3}-?\d{4}-?\d{4}-?\d{4}$/;
     var masterReg = /^5[1-5]\d{2}-?\d{4}-?\d{4}-?\d{4}$/;
     var discoverReg = /^6011-?\d{4}-?\d{4}-?\d{4}$/;
@@ -200,6 +202,7 @@ function verifyType(element) {
         alert('Número do Cartão Inválido');
         $('paybras_cc_number').value = "";
         $('paybras_cc_cid').value = "";
+        return false;
     }
 }
 
