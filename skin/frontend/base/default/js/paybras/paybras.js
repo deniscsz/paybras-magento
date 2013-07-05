@@ -126,15 +126,18 @@ function onCardChange(optElement) {
     if (selCard == 'diners') {
         $('paybras_cc_number').setAttribute('maxlength', 14);
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        maskcid.unmask().mask('999');
     }
     else {
         if (selCard == 'amex') {
             $('paybras_cc_number').setAttribute('maxlength', 15);
             $('paybras_cc_cid').setAttribute('maxlength', 4);
+            maskcid.unmask().mask('9999');
         }
         else {
             $('paybras_cc_number').setAttribute('maxlength', 16);
             $('paybras_cc_cid').setAttribute('maxlength', 3);
+            maskcid.unmask().mask('999');
         }
     }
 

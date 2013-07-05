@@ -380,7 +380,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                    ->addObject($invoice->getOrder())
                    ->save();
                 $comment = utf8_encode(sprintf('Fatura %s criada.', $invoice->getIncrementId()));
-                $order = $this->changeState($order,$status,NULL,$comment);
+                $order = $this->changeState($order,$status,NULL,$comment,$repay);
 				$order->save();
                 return 1;
             }
@@ -395,7 +395,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             }
             if ($order->canCancel()) {
                 $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
-        		$order = $this->changeState($order,$status,NULL,$order_msg);
+        		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
 				$order->save();
         		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;
@@ -407,7 +407,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
         elseif($status == 2) {
             $order_msg = "Pedido em análise. Transação: ". $transactionId;
-    		$order = $this->changeState($order,$status,NULL,$order_msg);
+    		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
 			$order->save();
 			
             $this->log("Pedido em analise: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
@@ -415,7 +415,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
         elseif($status == 1) {
             $order_msg = "Aguardando Pagamento. Transação: ". $transactionId;
-    		$order = $this->changeState($order,$status,NULL,$order_msg);
+    		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
 			$order->save();
             $this->log("Aguardando Pagamento, pedido: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
             return 0;
@@ -437,7 +437,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $state = $this->convertState($cod_state);
         $status = $this->convertStatus($cod_state);
 
-        $order->setState($state, $status, $comment, true);
+        $order->setState($state,$status,$comment,true,$repay);
         $order->getPayment()->setMessage($comment);
 		if($state == Mage_Sales_Model_Order::STATE_CANCELED) {
 			$order->cancel();

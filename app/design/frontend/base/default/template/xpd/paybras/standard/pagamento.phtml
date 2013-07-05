@@ -8,6 +8,13 @@
  */
  ?>
 
+<?php if(!Mage::getStoreConfig('payment/paybras/allvalidation')): ?>
+<script type="text/javascript" src="<?php echo $this->getSkinUrl('js/paybras/jquery.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->getSkinUrl('js/paybras/noConflict.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->getSkinUrl('js/paybras/bootstrap.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->getSkinUrl('js/paybras/scripts.js'); ?>"></script>
+<?php endif; ?>
+
 <?php Mage::getSingleton('customer/session')->setBeforeAuthUrl($this->getRequest()->getRequestUri());  //save requested URL for later redirection
 if(!Mage::getSingleton('customer/session')->isLoggedIn()) {  // if not logged in
     header("Status: 301");
@@ -23,7 +30,8 @@ Event.observe(window, "load", function() {
 	new MaskedInput('input[name="cartao_portador_cpf"]', '999.999.999-99');
 	new MaskedInput('input[name="cartao_portador_telefone"]', '(99)99999999?9');
 	new MaskedInput('input[name="cartao_portador_data_nascimento"]', '99/99/9999');
-	
+	maskcid = new MaskedInput('input[name="cartao_codigo_de_seguranca"]', '999');
+    
 	Validation.add('cpftitular','CPF Inválido',function(valueCPF) {
 	var cpf = valueCPF.replace(/[^\d]+/g,'');
 			if(cpf == '') return true;
@@ -107,7 +115,6 @@ Event.observe(window, "load", function() {
         		</ul>
 			</div>
 		</div>
-		
 		<div class="control-group">
 			<label class='tituloInput'>Nome do Titular* (como escrito no cartão)</label>
 			<input value="" name="cartao_portador_nome" class="required-entry" type="text" maxlength="50"/>
@@ -115,7 +122,7 @@ Event.observe(window, "load", function() {
 		
 		<div class="control-group">
 			<label class='tituloInput'>Número*</label>
-			<input value='' id="paybras_cc_number" name="cartao_numero" class="cartao" type="text" onkeyup="mascara(this,numeros)" onfocus="mascara(this,numeros)" onblur="mascara(this,numeros);verifyType(this);" class="required-entry" value="" maxlength="16" >
+			<input value='' id="paybras_cc_number" name="cartao_numero" class="cartao required-entry" type="text" onfocus="mascara(this,numeros)" onblur="mascara(this,numeros);verifyType(this);" class="required-entry" value="" maxlength="16" />
 		</div>
 		
 		<div class="control-group">
@@ -145,7 +152,6 @@ Event.observe(window, "load", function() {
 		<div class="control-group">
 			<label class='tituloInput'>Validade*</label>
 			<select class="select2-input select2-focused required-entry" name="cartao_validade_mes" style="margin-bottom: 4px; height: 25px; width: 55px;">
-				<option value="" selected></option>
 				<option value="01">01</option>
 				<option value="02">02</option>
 				<option value="03">03</option>
@@ -165,24 +171,27 @@ Event.observe(window, "load", function() {
 				<?php } ?>
 			</select>
 		</div>
-
-		<div class="texto">Dados do Dono do Cartão</div>
-
-		
-		<div class="control-group ">
-			<label class='tituloInput'>CPF</label>
-			<input name="cartao_portador_cpf" class="cpf cpftitular" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;"/>
-		</div>
-		
-		<div class="control-group">
-			<label class='tituloInput'>Data de Nascimento</label>
-			<input name="cartao_portador_data_nascimento" class="data" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;" maxlength="10"/>
-		</div>
-		
-		<div class="control-group">
-			<label class='tituloInput'>Telefone</label>
-			<input name="cartao_portador_telefone" class="phone" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;"/>
-		</div>
+        
+        <div id="dados-extras">
+    		<div class="texto">Dados do Dono do Cartão</div>
+            
+    		<div class="control-group ">
+    			<label class='tituloInput'>CPF do Dono do Cartão</label>
+    			<input name="cartao_portador_cpf" class="cpf cpftitular" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;"/>
+    		</div>
+    		
+            <?php if(Mage::getStoreConfig('payment/paybras/inputdob')): ?>
+    		<div class="control-group">
+    			<label class='tituloInput'>Data de Nascimento</label>
+    			<input name="cartao_portador_data_nascimento" class="data" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;" maxlength="10"/>
+    		</div>
+    		<?php endif; ?>
+            
+    		<div class="control-group">
+    			<label class='tituloInput'>Telefone</label>
+    			<input name="cartao_portador_telefone" class="phone" type="text" style="margin-bottom: 4px; height: 25px; width: 150px;"/>
+    		</div>
+        </div>
 	</div>
 	<div id='opcaoParcelamento' class='span4'>
 		<div class='texto' style='margin-top: 30px;'>Opções de Parcelamento</div>

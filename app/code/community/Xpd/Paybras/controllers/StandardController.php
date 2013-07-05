@@ -97,6 +97,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
             $paybras->processStatus($order,$status_codigo,$transactionId);
             
             $session->setFormaPag($fields['pedido_meio_pagamento']);
+			$session->setStatePag($paybras->convertStatus($status_codigo));
             
             if($fields['pedido_meio_pagamento'] == 'boleto' || $fields['pedido_meio_pagamento'] == 'tef_bb') {
                 $url_redirect = utf8_decode($json_php->{'url_pagamento'});
@@ -205,14 +206,15 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 				$status_codigo = $json_php->{'status_codigo'};
 				
 				$payment->setPaybrasTransactionId(utf8_encode($transactionId))->save();
-				$paybras->processStatus($order,$status_codigo,$transactionId);
+				$paybras->processStatus($order,$status_codigo,$transactionId,$status_codigo);
 				
 				$session->setFormaPag($fields['pedido_meio_pagamento']);
+				$session->setStatePag($paybras->convertStatus($status_codigo));
 				
-				$url = Mage::getUrl('xpd/paybras/standard/success');
+				$url = Mage::getUrl('paybras/standard/success');
 			}
 			else {
-				$url = Mage::getUrl('xpd/paybras/standard/failure');
+				$url = Mage::getUrl('paybras/standard/failure');
 			}
 			
 			$this->getResponse()->setRedirect($url);
@@ -257,6 +259,9 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                     $order_redirect = false;
                     break;
 				case Mage_Sales_Model_Order::STATE_COMPLETE:
+                    $order_redirect = false;
+                    break;
+                case Mage_Sales_Model_Order::STATE_HOLDED:
                     $order_redirect = false;
                     break;
 				case Mage_Sales_Model_Order::STATE_CLOSED:
@@ -387,7 +392,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 );
 				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
-                $curlAdapter->setConfig(array('timeout'   => 20));
+                $curlAdapter->setConfig(array('timeout' => 20));
                 $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
                 $resposta = $curlAdapter->read();
                 $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
@@ -397,10 +402,10 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 if($json->{'sucesso'} == '1') {
                     if($json->{'pedido_id'} == $pedidoIdVerifica && $json->{'valor_original'} == $valor && $json->{'status_codigo'} == $status_codigo) {
                         $result = $paybras->processStatus($order,$status,$transactionId);
-                        if($result >= 0) {
-                            echo '{"retorno":"OK"}';
-							$paybras->log('{"retorno":"OK"}');
-                        }
+                        //if($result >= 0) {
+                            echo '{"retorno":"ok"}';
+							$paybras->log('{"retorno":"ok"}');
+                        //}
                     }
 					else {
 						$paybras->log('Informações do pedido não bateram');

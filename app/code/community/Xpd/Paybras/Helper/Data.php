@@ -365,8 +365,7 @@ class Xpd_Paybras_Helper_Data extends Mage_Core_Helper_Abstract {
      * @param   array $allowedTags
      * @return  string
      */
-    public function escapeHtml($data, $allowedTags = null)
-    {
+    public function escapeHtml($data, $allowedTags = null) {
         $core_helper = Mage::helper('core');
         if (method_exists($core_helper, "escapeHtml")) {
             return $core_helper->escapeHtml($data, $allowedTags);
@@ -375,6 +374,6 @@ class Xpd_Paybras_Helper_Data extends Mage_Core_Helper_Abstract {
         } else {
             return $data;
         }
-        
     }
+    
 }
