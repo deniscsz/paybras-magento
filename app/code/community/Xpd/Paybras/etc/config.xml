@@ -137,13 +137,10 @@
                 <title>Paybras</title>
                 <installments>1</installments>
                 <cctypes>visa,mastercard,elo,amex,diners</cctypes>
-                <teftypes>tef_bb,tef_bradesco,tef_itau</teftypes>
                 <environment>0</environment>
                 <allowspecific>0</allowspecific>
                 <notification>1</notification>
                 <allvalidation>0</allvalidation>
-				<textboleto>Após a confirmação do pedido você poderá gerar e imprimir seu boleto</textboleto>
-				<texttef>Após a confirmação do pedido você será redirecionado para o site do Banco do Brasil</texttef>
             </paybras>
         </payment>
     </default>

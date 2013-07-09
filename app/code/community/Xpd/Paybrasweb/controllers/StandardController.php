@@ -3,10 +3,10 @@
  * Paybras
  *
  * @category   Payments
- * @package    Xpd_Paybras
+ * @package    Xpd_Paybrasweb
  * @license    OSL v3.0
  */
-class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
+class Xpd_Paybrasweb_StandardController extends Mage_Core_Controller_Front_Action {
 
     /**
      * Header de Sessão Expirada
@@ -25,7 +25,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      * @return Xpd_Paybras_Model_Standard
      */
     public function getStandard() {
-        return Mage::getSingleton('paybras/standard');
+        return Mage::getSingleton('paybrasweb/standard');
     }
     
     /**
@@ -39,10 +39,10 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         $session->unsUrlRedirect();
         
         if($paybras->getEnvironment() == '1') {
-            $url = 'https://service.paybras.com/payment/api/criaTransacao';
+            $url = 'https://service.paybras.com/payment/checkoutWeb';
         }
         else {
-            $url = 'https://sandbox.paybras.com/payment/api/criaTransacao';
+            $url = 'https://sandbox.paybras.com/payment/checkoutWeb';
         }
         
         $orderId = $order->getId();
@@ -55,9 +55,12 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         else {
             $customer = false;
         }
+        
+        $order = $paybras->changeState($order,1,NULL,"Aguardando Pagamento, pedido: ".$order->getRealOrderId());
+		$order->save();
 
         $fields = $paybras->dataTransaction($customer,$order,$payment);
-        
+        var_dump($fields);
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
         $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
@@ -67,7 +70,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         
         if(function_exists('json_decode')) {
             $json_php = json_decode($retorno);
-            
+            var_dump($resposta);
             if($json_php->{'sucesso'} == '1') {
                 $paybras->log('True para consulta');
                 $flag = true;
@@ -106,7 +109,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                     $payment->setPaybrasOrderId($url_redirect)->save();
                 }
             } elseif($fields['pedido_meio_pagamento'] == 'cartao') {
-				$url_redirect = Mage::getBaseUrl() . 'paybras/standard/pagamento/order_id/' . $orderId;
+				$url_redirect = Mage::getBaseUrl() . 'paybrasweb/standard/pagamento/order_id/' . $orderId;
 				$payment->setPaybrasOrderId($url_redirect)->save();
 			}
             
@@ -126,7 +129,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         }
 		
         $session->setOrderId($orderId);
-        $this->getResponse()->setRedirect($url);
+        //$this->getResponse()->setRedirect($url);
         //$session->unsUrlRedirect();
     }
     
@@ -135,9 +138,9 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      * 
      */
     public function repayAction() {
-		if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybras/repay')) {
+		if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybrasweb/repay')) {
 			$session = Mage::getSingleton('core/session');
-			$paybras = Mage::getSingleton('paybras/standard');
+			$paybras = Mage::getSingleton('paybrasweb/standard');
 			$orderId = $session->getPayOrderId();
 			
 			if(strlen((string)$orderId)<9) {
@@ -230,7 +233,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      */
     public function pagamentoAction() {
 		Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*'));
-        $paybras = Mage::getSingleton('paybras/standard');
+        $paybras = Mage::getSingleton('paybrasweb/standard');
 		$session = Mage::getSingleton('core/session');
         
         if($this->getRequest()->getParam('order_id')) {
@@ -324,7 +327,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      * 
      */
     public function capturaAction() {
-        if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybras/notification')) {
+        if($this->getRequest()->isPost() && Mage::getStoreConfig('payment/paybrasweb/notification')) {
             $paybras = $this->getStandard();
             $json = $_POST['data'];
             $paybras->log($json);
@@ -359,11 +362,9 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 if(strpos($pedidoId,'_') !== false) {
                     $pedido = explode("_",$pedidoId);
                     $orderId = $pedido[0];
-                    $ehRepay = 1;
                 }
                 else {
                     $orderId = $pedidoId;
-                    $ehRepay = NULL;
                 }
                 
                 $order = Mage::getModel('sales/order')
@@ -403,7 +404,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 $json = json_decode($retorno);
                 if($json->{'sucesso'} == '1') {
                     if($json->{'pedido_id'} == $pedidoIdVerifica && $json->{'valor_original'} == $valor && $json->{'status_codigo'} == $status_codigo) {
-                        $result = $paybras->processStatus($order,$status,$transactionId,$ehRepay);
+                        $result = $paybras->processStatus($order,$status,$transactionId);
                         //if($result >= 0) {
                             echo '{"retorno":"ok"}';
 							$paybras->log('{"retorno":"ok"}');
@@ -447,7 +448,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      */
     public function successAction() {
 		$session = Mage::getSingleton('core/session');
-		$paybras = Mage::getSingleton('paybras/standard');
+		$paybras = Mage::getSingleton('paybrasweb/standard');
 		$orderId = $session->getPayOrderId();
         
 		if(strlen((string)$orderId)<9) {
@@ -473,7 +474,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
      */
     public function failureAction() {
 		$session = Mage::getSingleton('core/session');
-		$paybras = Mage::getSingleton('paybras/standard');
+		$paybras = Mage::getSingleton('paybrasweb/standard');
 		
 		$this->loadLayout();
 		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');

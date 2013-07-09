@@ -66,7 +66,26 @@
                 return true;
     });
 
-//Validation.add('cccard','Cartão Inválido',verifyType($('paybras_cc_number')));
+    Validation.add('cccard','Cartão Inválido',function(ccnum) {
+        ccnum = ccnum.split("-").join("");
+    
+        var checksum = 0;
+        for (var i=(2-(ccnum.length % 2)); i<=ccnum.length; i+=2) {
+            checksum += parseInt(ccnum.charAt(i-1));
+        }
+        
+        for (var i=(ccnum.length % 2) + 1; i<ccnum.length; i+=2) {
+            var digit = parseInt(ccnum.charAt(i-1)) * 2;
+            if (digit < 10) { checksum += digit; } else { checksum += (digit-9); }
+        }
+        
+        if ((checksum % 10) == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
 </script>
 <fieldset class="form-list">
 <?php $_ccType = $this->getInfoData('cc_type') ?>
@@ -74,9 +93,7 @@
 <ul id="payment_form_<?php echo $_code ?>" style="display:none;">
 
     <li id="li-cc">
-    <input onclick="toggleCard();" type="radio" value="cartao" name="forma_pagamento" id="forma-pagamento-cartao"/>
-    <label style="float: none;" for="forma-pagamento-cartao">Cartão de Crédito</label>
-    <ul id="cc" style="display: none;">
+    <ul id="cc">
 
         <li  style="display: block">
             <div class="input-box" style="width: 100%;">
@@ -85,7 +102,7 @@
         			<li id="li-card-<?php echo $_typeCode ?>" class="seleciona-bandeiras-cards">
         				<label for="opt-<?php echo $_typeCode ?>"><img src="<?php echo $this->getSkinUrl('images/paybras/'.$_typeCode.'/'. $parcela_count .'x.gif') ?>" /></label>
                         
-                        <input type="radio" class="radio" name="payment[cc_type]" id="opt-<?php echo $_typeCode ?>" value="<?php echo $_typeCode ?>" onclick="onCardChange(this);"/>
+                        <input type="radio" class="radio" name="payment[cc_type]" id="opt-<?php echo $_typeCode ?>" value="<?php echo $_typeCode ?>" onclick="onCardChange(this);" style="display: none;"/>
         			</li>
         		<?php endforeach; ?>
         		</ul>
@@ -144,7 +161,7 @@
                     <?php if($j == 1): ?>
                     <option value="<?php echo $j; ?>"><?php echo 'À vista - '.$this->helper('checkout')->formatPrice($parcela); ?></option>
                     <?php else: ?>
-    				<option value="<?php echo $j ?>"><?php echo $j.'x - '.$this->helper('checkout')->formatPrice($parcela); ?></option>
+    				<option value="<?php echo $j ?>"><?php echo $j.'x - '.$this->helper('checkout')->formatPrice($parcela).' = '. $this->helper('checkout')->formatPrice($parcela*$j); ?></option>
                     <?php endif; ?>
     		<?php $j+=1; endforeach; ?>
                 </select>
@@ -198,47 +215,8 @@
         </li>
     </ul>
     </li>
-    
-    <li id="li-boleto">
-        <input onclick="toggleBoleto();" type="radio" value="boleto" name="forma_pagamento" id="forma-pagamento-boleto"/>
-        <label style="float: none;" for="forma-pagamento-boleto">Boleto</label>
         
-        <div id="boleto" style="display: none;">
-            <p><?php echo Mage::getStoreConfig('payment/paybras/textboleto'); ?></p>
-        </div>
-    </li>
-    
-    <?php if(Mage::getStoreConfig('payment/paybras/teftypes')): ?>
-    <li id="li-tef">
-        <input onclick="toggleTef();" type="radio" value="tef_bb" name="forma_pagamento" id="forma-pagamento-tef"/>
-		<label style="float: none;" for="forma-pagamento-tef">Débito Online</label>
-        
-        <div id="tef" style="display: none;">
-            <p><?php echo Mage::getStoreConfig('payment/paybras/texttef'); ?></p>
-			<ul>
-				<li>
-					<p>Escolha seu banco:</p>
-                    <?php $tefTypes = explode(",",Mage::getStoreConfig('payment/paybras/teftypes')); ?>
-                    <select id="<?php echo $_code ?>_tef_banco" name="payment[tef_banco]" class="tef_banco required-entry">
-                        <?php foreach($tefTypes as $debito): ?>
-                            <?php if($debito == 'tef_bb'): ?>
-                                <option value="tef_bb">Banco do Brasil</option>
-    						<?php endif; ?>
-                            <?php if($debito == 'tef_bradesco'): ?>
-                                <option value="tef_bradesco">Bradesco</option>
-    						<?php endif; ?>
-                            <?php if($debito == 'tef_itau'): ?>
-                                <option value="tef_itau">Itaú</option>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-					</select>
-				</li>
-			</ul>
-        </div>
-    </li>
-    <?php endif; ?>
-    
-    <input title="<?php echo $this->__('Check Forma Pagamento') ?>" name="payment[check_formapagamento]" type="hidden" id="<?php echo $_code ?>_check_formapagamento" value="" />
+    <input title="<?php echo $this->__('Escolha da Forma de Pagamento') ?>" name="payment[check_formapagamento]" type="hidden" id="<?php echo $_code ?>_check_formapagamento" value="cartao" />
     
 </ul>
 </fieldset>

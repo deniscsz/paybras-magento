@@ -1,39 +1,39 @@
 function buscarEndereco(host,quale) {
 
 	new Ajax.Request(host + 'paybras_cep.php?cep=' + document.getElementById(quale+':postcode').value.replace(/\+/g, ''), {
-            method:'get',
-            onSuccess: function(respostaCEP) {
-				r = respostaCEP.responseText;
-				
-				street_1 = r.substring(0, (i = r.indexOf(':')));
-				document.getElementById(quale+':street1').value = unescape(street_1.replace(/\+/g," "));
+        method:'get',
+        onSuccess: function(respostaCEP) {
+			r = respostaCEP.responseText;
+			
+			street_1 = r.substring(0, (i = r.indexOf(':')));
+			document.getElementById(quale+':street1').value = unescape(street_1.replace(/\+/g," "));
 
-				r = r.substring(++i);
-				street_4 = r.substring(0, (i = r.indexOf(':')));
-				document.getElementById(quale+':street4').value = unescape(street_4.replace(/\+/g," "));
+			r = r.substring(++i);
+			street_4 = r.substring(0, (i = r.indexOf(':')));
+			document.getElementById(quale+':street4').value = unescape(street_4.replace(/\+/g," "));
 
-				r = r.substring(++i);
-				city = r.substring(0, (i = r.indexOf(':')));
-				document.getElementById(quale+':city').value = unescape(city.replace(/\+/g," "));
+			r = r.substring(++i);
+			city = r.substring(0, (i = r.indexOf(':')));
+			document.getElementById(quale+':city').value = unescape(city.replace(/\+/g," "));
 
-				r = r.substring(++i);
-				region = r.substring(0, (i = r.indexOf(':')));
+			r = r.substring(++i);
+			region = r.substring(0, (i = r.indexOf(':')));
 
-				r = r.substring(++i);
-				
-				regionID = r.substring(0, 3);
-				
-				regionSelect = region;
-				region = region.replace(/\+/g," ");
-				
-				$$('select[name="'+quale+'[region_id]"] option').each(function(element) {
-					if(element.value == regionID){
-						element.selected = true;
-					}
-				});
-				
-				setTimeout(function() { document.getElementById(quale+':street2').focus(); }, 1);
-			}
+			r = r.substring(++i);
+			
+			regionID = r.substring(0, 3);
+			
+			regionSelect = region;
+			region = region.replace(/\+/g," ");
+			
+			$$('select[name="'+quale+'[region_id]"] option').each(function(element) {
+				if(element.value == regionID){
+					element.selected = true;
+				}
+			});
+			
+			setTimeout(function() { document.getElementById(quale+':street2').focus(); }, 1);
+		}
 	});
 	
 };
@@ -106,16 +106,16 @@ function attrName(element) {
                     document.getElementById("paybras_cc_type_dob_div").style.display="none";
                 }
                 else {
-                                        document.getElementById("paybras_cc_cpftitular_div").style.display="block";
-                                        document.getElementById("paybras_cc_phone_div").style.display="block";
-                                        document.getElementById("paybras_cc_type_dob_div").style.display="block";
+                    document.getElementById("paybras_cc_cpftitular_div").style.display="block";
+                    document.getElementById("paybras_cc_phone_div").style.display="block";
+                    document.getElementById("paybras_cc_type_dob_div").style.display="block";
                 }
             },
             onFailure: function() { 
-                                document.getElementById("paybras_cc_cpftitular_div").style.display="block";
-                                document.getElementById("paybras_cc_phone_div").style.display="block";
-                                document.getElementById("paybras_cc_type_dob_div").style.display="block";
-                        }
+                document.getElementById("paybras_cc_cpftitular_div").style.display="block";
+                document.getElementById("paybras_cc_phone_div").style.display="block";
+                document.getElementById("paybras_cc_type_dob_div").style.display="block";
+            }
         });
     }
 
@@ -123,24 +123,40 @@ function onCardChange(optElement) {
     var meuID = optElement.id;
     var selCard = optElement.value; 
     
+    $$('.seleciona-bandeiras-cards label').each(function(e,i){
+        $(e).removeClassName('selecionada');
+    });
+    
     if (selCard == 'diners') {
         $('paybras_cc_number').setAttribute('maxlength', 14);
         $('paybras_cc_cid').setAttribute('maxlength', 3);
         maskcid.unmask().mask('999');
+        $(optElement).previous(0).addClassName('selecionada');
     }
     else {
         if (selCard == 'amex') {
             $('paybras_cc_number').setAttribute('maxlength', 15);
             $('paybras_cc_cid').setAttribute('maxlength', 4);
             maskcid.unmask().mask('9999');
+            $(optElement).previous(0).addClassName('selecionada');
         }
         else {
             $('paybras_cc_number').setAttribute('maxlength', 16);
             $('paybras_cc_cid').setAttribute('maxlength', 3);
             maskcid.unmask().mask('999');
+            
+            if(selCard == 'visa') {
+                $(optElement).previous(0).addClassName('selecionada');
+            }
+            if(selCard == 'mastercard') {
+                $(optElement).previous(0).addClassName('selecionada');
+            }
+            if(selCard == 'elo') {
+                $(optElement).previous(0).addClassName('selecionada');
+            }
         }
     }
-
+    
     $('paybras_cc_number').value = "";
     $('paybras_cc_cid').value = "";
 }
@@ -170,20 +186,36 @@ function verifyType(element) {
     var amexReg = /^3[47]\d{13}$/;
     var dinersReg = /^3[068]\d{12}$/;
     
+    $$('.seleciona-bandeiras-cards label').each(function(e,i){
+        $(e).removeClassName('selecionada');
+    });
+    
     if(visaReg.test(ccnum)) {
         $('opt-visa').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        $('opt-visa').previous(0).addClassName('selecionada');
     } else if(masterReg.test(ccnum)) {
         $('opt-mastercard').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        $('opt-mastercard').previous(0).addClassName('selecionada');
     } else if(amexReg.test(ccnum)) {
         $('opt-amex').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 4);
+        $('opt-amex').previous(0).addClassName('selecionada');
     } else if(dinersReg.test(ccnum)) {
         $('opt-diners').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        $('opt-diners').previous(0).addClassName('selecionada');
     } else if(discoverReg.test(ccnum)) {
         //$('opt-visa').checked=true;
+    } else {
+        $('paybras_cc_cid').setAttribute('maxlength', 3);
+        if(ccnum.length < 14) {
+        }
+        else {
+            $('opt-elo').checked = true;
+            $('opt-elo').previous(0).addClassName('selecionada');
+        }
     }
     
     ccnum = ccnum.split("-").join("");
@@ -202,11 +234,9 @@ function verifyType(element) {
         return true;
     }
     else {
-        alert('Número do Cartão Inválido');
-        $('paybras_cc_number').value = "";
+        //alert('Número do Cartão Inválido');
+        //$('paybras_cc_number').value = "";
         $('paybras_cc_cid').value = "";
         return false;
     }
 }
-
-

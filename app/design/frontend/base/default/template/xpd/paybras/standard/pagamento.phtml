@@ -109,7 +109,7 @@ Event.observe(window, "load", function() {
         			<li id="li-card-<?php echo $_typeCode ?>" class="seleciona-bandeiras-cards">
         				<label for="opt-<?php echo $_typeCode ?>"><img src="<?php echo $this->getSkinUrl('images/paybras/'.$_typeCode.'/'. $parcela_count .'x.gif') ?>" /></label>
                         
-                        <input type="radio" class="radio" name="cc_type" id="opt-<?php echo $_typeCode ?>" value="<?php echo $_typeCode ?>" onclick="onCardChange(this);"/>
+                        <input type="radio" class="radio" name="cc_type" id="opt-<?php echo $_typeCode ?>" value="<?php echo $_typeCode ?>" onclick="onCardChange(this);" style="display: none;"/>
         			</li>
         		<?php endforeach; ?>
         		</ul>

@@ -149,6 +149,8 @@
     display:block;
     position:relative;
     width: 60px;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 #cc .card-logo li label {
@@ -194,4 +196,11 @@
 	height: 30px;
 	padding-top: 5px;
 	width: 250px;
+}
+
+.selecionada {
+    border: 1px solid #CCC;
+    background: #EEEEEE;
+    padding-bottom: 5px;
+    border-radius: 5px;
 }

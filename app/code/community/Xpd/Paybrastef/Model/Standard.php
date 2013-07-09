@@ -3,14 +3,14 @@
  * Paybras
  *
  * @category   Payments
- * @package    Xpd_Paybras
+ * @package    Xpd_Paybrastef
  * @license    OSL v3.0
  */
-class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
+class Xpd_Paybrastef_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 
-    protected $_code = 'paybras';
-    protected $_formBlockType = 'paybras/form_cc';
-    protected $_infoBlockType = 'paybras/info';
+    protected $_code = 'paybrastef';
+    protected $_formBlockType = 'paybrastef/form_tef';
+    protected $_infoBlockType = 'paybrastef/info';
     protected $_isInitializeNeeded = true;
     
     protected $_canUseInternal = true;
@@ -62,7 +62,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @param bool $forceLog
      */
     public function log($message, $level = null, $file = 'paybras.log', $forceLog = false) {
-        Mage::log("Paybras - " . $message, $level, 'paybras.log', $forceLog);
+        Mage::log("Paybrastef - " . $message, $level, 'paybras.log', $forceLog);
     }
     
     /**
@@ -71,7 +71,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getOrderPlaceRedirectUrl() {
-        return Mage::getUrl('paybras/standard/redirect', array('_secure' => true));
+        return Mage::getUrl('paybrastef/standard/redirect', array('_secure' => true));
     }
     
     /**
@@ -80,7 +80,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return int
      */
     public function getEnvironment() {
-        return Mage::getStoreConfig('payment/paybras/environment');
+        return Mage::getStoreConfig('payment/paybrastef/environment');
     }
     
     /**
@@ -89,7 +89,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getEmailStore() {
-        return Mage::getStoreConfig('payment/paybras/emailstore');
+        return Mage::getStoreConfig('payment/paybrastef/emailstore');
     }
     
     /**
@@ -98,14 +98,14 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getToken() {
-        return Mage::getStoreConfig('payment/paybras/token');
+        return Mage::getStoreConfig('payment/paybrastef/token');
     }
         
     /**
      * Sobrecarga da função assignData, acrecentado dados adicionais.
      * 
 	 * @param $data - Informação adiquirida do método de pagamento.
-     * @return Mage_Payment_Model_Method_Cc
+     * @return Mage_Payment_Model_Method_Abstract
      */
     public function assignData($data) {
         $details = array();
@@ -113,21 +113,9 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $data = new Varien_Object($data);
         }
         $info = $this->getInfoInstance();
-        $additionaldata = array('cc_parcelas' => $data->getCcParcelas(), 'cc_cid_enc' => $info->encrypt($data->getCcCid()), 'cpf_titular' => $data->getCcCpftitular(), 'day_titular' => $data->getCcDobDay(), 'month_titular' => $data->getCcDobMonth(), 'year_titular' => $data->getCcDobYear(), 'tel_titular' => $data->getPhone(), 'forma_pagamento' => $data->getCheckFormapagamento(), 'tef_banco' => $data->getTefBanco());
+        $additionaldata = array('tef_banco' => $data->getTefBanco(), 'forma_pagamento' => 'tef_bb');
         $info->setAdditionalData(serialize($additionaldata));
-        $info->setCcType($data->getCcType());
-        $info->setCcOwner($data->getCcOwner());
-        $info->setCcExpMonth($data->getCcExpMonth());
-        $info->setCcExpYear($data->getCcExpYear());
-        $info->setCcNumberEnc($info->encrypt($data->getCcNumber()));
-        $info->setCcCidEnc($info->encrypt($data->getCcCid()));
-        $info->setCcLast4(substr($data->getCcNumber(), -4));
         
-        $this->formaPagamento = $data->getCheckFormapagamento();
-        
-        //Mage::log($this->formaPagamento);
-        //Mage::getSingleton('core/session')->setFormaPagamento($data->getCheckFormapagamento);
-        //Mage::log(Mage::getSingleton('core/session')->getFormaPagamento());
         return $this;
     }
     
@@ -207,37 +195,11 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $fields['pagador_sexo'] = $order->getCustomerGender();
         
         $additionaldata = unserialize($payment->getData('additional_data'));
-        $this->formaPagamento = $additionaldata['forma_pagamento'];
+        $this->formaPagamento = $additionaldata['tef_banco'];
         
-        /* Dados do Cartão */
-        if($additionaldata['forma_pagamento'] == "cartao") {
-            $fields['cartao_portador_nome'] = $payment->getCcOwner();
-            $fields['cartao_numero'] = $payment->decrypt($payment->getCcNumberEnc());
-            $fields['cartao_bandeira'] = $payment->getData('cc_type');
-            $fields['cartao_validade_mes'] = str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
-            $fields['cartao_validade_ano'] = substr($payment->getCcExpYear(),-2);
-            $fields['cartao_parcelas'] = $additionaldata['cc_parcelas'];
-            $fields['cartao_codigo_de_seguranca'] = $payment->decrypt($additionaldata['cc_cid_enc']);
-            $fields['numberPayment'] = $additionaldata['cc_parcelas'];
-            
-            $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
-            if(!$samePerson) {
-                $telefone = $additionaldata['tel_titular'];
-                $fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
-                $fields['cartao_portador_telefone'] = substr($telefone,2);
-                $fields['cartao_portador_cpf'] = $additionaldata['cpf_titular'];
-                $fields['cartao_portador_data_de_nascimento'] = ($additionaldata['day_titular'] < 10 ? '0' . $additionaldata['day_titular'] : $additionaldata['day_titular']). '/' . ($additionaldata['month_titular'] < 10 ? '0' . $additionaldata['month_titular'] : $additionaldata['month_titular']) . '/' . $additionaldata['year_titular'];
-            }
-        }
-        if($additionaldata['forma_pagamento'] == 'tef_bb') {
-            $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybras/standard/success/';
-			$fields['pedido_meio_pagamento'] = $additionaldata['tef_banco'];
-        }
-		else {
-			$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
-		}
-        
-        //$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
+        $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybras/standard/success/';
+		$fields['pedido_meio_pagamento'] = $additionaldata['tef_banco'];
+
         $fields['pedido_id'] = $order->getIncrementId();
         $fields['pedido_valor_total_original'] = number_format($order->getGrandTotal(), 2, '.', '');
         
@@ -266,7 +228,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $fields['pagador_cep'] = str_replace('.','',$billingAddress->getData('postcode'));
             $fields['pagador_cidade'] = $billingAddress->getData('city');
             $fields['pagador_estado'] = $billingAddress->getRegionCode();
-            $fields['pagador_pais'] = $billingAddress->getCountry() ? Mage::helper('paybras')->convertCodeCountry($billingAddress->getCountry()) : "BRA";
+            $fields['pagador_pais'] = $billingAddress->getCountry() ? Mage::helper('paybrastef')->convertCodeCountry($billingAddress->getCountry()) : "BRA";
         }
         else {
             $this->log('Erro ao recuperar informacoes de endereco de cobranca');
@@ -298,7 +260,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $fields['entrega_cep'] = str_replace('.','',$shippingAddress->getData('postcode'));
             $fields['entrega_cidade'] = $shippingAddress->getData('city');
             $fields['entrega_estado'] = $shippingAddress->getRegionCode() ? $shippingAddress->getRegionCode() : $billingAddress->getRegionCode();
-            $fields['entrega_pais'] = $shippingAddress->getCountry() ? Mage::helper('paybras')->convertCodeCountry($shippingAddress->getCountry()) : "BRA";
+            $fields['entrega_pais'] = $shippingAddress->getCountry() ? Mage::helper('paybrastef')->convertCodeCountry($shippingAddress->getCountry()) : "BRA";
         }
         else {
             $this->log('Erro ao recuperar informacoes de endereco de entrega');
@@ -321,33 +283,6 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $count += 1;
         }
         $fields['pedido_moeda'] = Mage::app()->getStore()->getCurrentCurrencyCode();
-		
-		if($post) {
-			$fields['cartao_portador_nome'] = $post['cartao_portador_nome'];
-            $fields['cartao_numero'] = $post['cartao_numero'];
-            $fields['cartao_bandeira'] = $post['cc_type'];
-            $fields['cartao_validade_mes'] = $post['cartao_validade_mes'];
-            $fields['cartao_validade_ano'] = $post['cartao_validade_ano'];
-            $fields['cartao_parcelas'] = $post['cartao_parcelas'];
-            $fields['cartao_codigo_de_seguranca'] = $post['cartao_codigo_de_seguranca'];
-			$fields['pedido_id'] = $order->getIncrementId().'_1';
-            
-            $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
-            if(!$samePerson) {
-                $telefone = $post['cartao_portador_telefone'];
-				if($telefone) {
-					$telefone = str_replace(')','',str_replace('(','',$telefone)); 
-					$fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
-					$fields['cartao_portador_telefone'] = substr($telefone,2);
-				}
-                if($post['cartao_portador_cpf']) {
-					$fields['cartao_portador_cpf'] = $post['cartao_portador_cpf'];
-				}
-				if($post['cartao_portador_data_de_nascimento']) {
-					$fields['cartao_portador_data_de_nascimento'] = $post['cartao_portador_data_de_nascimento'];
-				}
-            }
-		}
 		
         return $fields;
     }
@@ -396,7 +331,6 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             if ($order->canCancel()) {
                 $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
         		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
-                $order->cancel();
 				$order->save();
         		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;
@@ -454,8 +388,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return Mage_Sales_Model_Order
      */
     public function convertState($num,$repay = NULL) {
-        Mage::log('O repay eh '.$repay);
-		if($repay != NULL) {
+		if($repay) {
 			switch($num) {
 				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
@@ -485,7 +418,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      */
     public function convertStatus($num,$repay = NULL) {
         $num = (int)$num;
-		if($repay != NULL) {
+		if($repay) {
 			switch($num) {
 				case 1: return 'pending_payment';
 				case 2: return 'holded';
@@ -506,146 +439,5 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 			}
 		}
     }
-    
-    /**
-     * Remove acentos e caracteres especiais
-     * 
-	 * @param string
-     * @return string
-     */
-    public function removeInvalidos($str) {
-        $invalid = array('Š'=>'S', 'š'=>'s', 'Đ'=>'Dj', 'đ'=>'dj', 'Ž'=>'Z', 'ž'=>'z',
-        'Č'=>'C', 'č'=>'c', 'Ć'=>'C', 'ć'=>'c', 'À'=>'A', 'Á'=>'A', 'Â'=>'A', 'Ã'=>'A',
-        'Ä'=>'A', 'Å'=>'A', 'Æ'=>'A', 'Ç'=>'C', 'È'=>'E', 'É'=>'E', 'Ê'=>'E', 'Ë'=>'E',
-        'Ì'=>'I', 'Í'=>'I', 'Î'=>'I', 'Ï'=>'I', 'Ñ'=>'N', 'Ò'=>'O', 'Ó'=>'O', 'Ô'=>'O',
-        'Õ'=>'O', 'Ö'=>'O', 'Ø'=>'O', 'Ù'=>'U', 'Ú'=>'U', 'Û'=>'U', 'Ü'=>'U', 'Ý'=>'Y',
-        'Þ'=>'B', 'ß'=>'Ss', 'à'=>'a', 'á'=>'a', 'â'=>'a', 'ã'=>'a', 'ä'=>'a', 'å'=>'a',
-        'æ'=>'a', 'ç'=>'c', 'è'=>'e', 'é'=>'e', 'ê'=>'e',  'ë'=>'e', 'ì'=>'i', 'í'=>'i',
-        'î'=>'i', 'ï'=>'i', 'ð'=>'o', 'ñ'=>'n', 'ò'=>'o', 'ó'=>'o', 'ô'=>'o', 'õ'=>'o',
-        'ö'=>'o', 'ø'=>'o', 'ù'=>'u', 'ú'=>'u', 'û'=>'u', 'ý'=>'y',  'ý'=>'y', 'þ'=>'b',
-        'ÿ'=>'y', 'Ŕ'=>'R', 'ŕ'=>'r', "`" => "'", "´" => "'", "„" => ",", "`" => "'",
-        "´" => "'", "“" => "\"", "”" => "\"", "´" => "'", "&acirc;€™" => "'", "{" => "",
-        "~" => "", "–" => "-", "’" => "'");
-         
-        $str = str_replace(array_keys($invalid), array_values($invalid), $str);
-         
-        return $str;
-    }
-
-    /**
-     * Compara nomes semelhantes
-     * 
-	 * @param string Nome
-	 * @param string Nome
-     * @return boolean
-     */
-    public function comparaNome($nomecartao, $nomepessoa) {
-        $acertos = 1;
-        $nomecartao = $this->removeInvalidos($nomecartao);
-        //var_dump($nomecartao);
-        $nomepessoa = $this->removeInvalidos($nomepessoa);
-        //var_dump($nomepessoa);
-        // Com intuito de melhorar a comparação:
-        // Retiram-se espaços duplos, triplos etc., espaços nas laterais, e convertem-se caracteres para minúsculo
-        // Convertem-se ainda para arrays
-        $nomecartao = explode(" ", strtolower(trim(preg_replace('/\s+/', ' ', $nomecartao))));
-        $nomepessoa = explode(" ", strtolower(trim(preg_replace('/\s+/', ' ', $nomepessoa))));
-    
-        // Número de comparações que devem ser atendidas com tolerância de 1 falha.
-        // Este número corresponde ao tamanho do menor array, ou seja, menor quantidade de strings dos nomes (cartao ou pessoa)
-        $objetivo_comparacoes = (count($nomecartao) > count($nomepessoa)) ? count($nomepessoa) : count($nomecartao);
-        //echo "1 " . $nomecartao[0] ." ". $nomepessoa[0] . "<br>";
-        // o primeiro nome deve coincidir
-        if ($nomecartao[0] != $nomepessoa[0]) {
-            return false;
-        }
-    
-        // depois do primeiro nome, a validacao é feita pela quantidade
-        // de caracteres abreviado do nome (Ex.: s - Silva) e deve
-        // ser procurado em todo o sobrenome, não necessariamente na ordem em que são escritos
-        // Ex.: daniel s a - daniel silva almeida (true) - 3 acertos
-        //      daniel a s - daniel silva almeida (true) - 3 acertos
-        //      daniel s   - daniel silva almeida (true) - 2 acertos - tolerancia de 1
-        //      daniel a   - daniel silva almeida (true) - 2 acertos - tolerancia de 1
-        //      daniel d b - daniel silva almeida (false) - 1 acerto - tolerancia de 1 - ainda faltou 1 acerto.
-        //      daniel d   - daniel almeida       (false) - 1 acerto - tolerancia de 1 - ainda faltou 1 acerto.
-        $totalCompare = (count($nomecartao) >= count($nomepessoa)) ? count($nomecartao) - 1 : count($nomepessoa) - 1;
-        $minCompare = (count($nomecartao) <= count($nomepessoa)) ? count($nomecartao) - 1 : count($nomepessoa) - 1;
-        $inicial = 0;
-           
-        for ($i = 1; $i < count($nomecartao); $i++) {
-            $encontrou = false;         
-    
-            for ($j = 1; $j < count($nomepessoa) && !$encontrou; $j++) {
-                // compara quantidade de caracteres iguais
-                // se no sobrenome havia uma letra (s) do sobrenome completo
-                // "silva" pegamos apenas o primeiro caracter para comparacao
-                
-                if (strlen($nomecartao[$i]) == 1) {
-                    if ($nomecartao[$i] == $nomepessoa[$j][0]) {
-                        $encontrou = true;
-                        $acertos++;
-                    }
-                } else if (strlen($nomecartao[$i]) > 1) {
-                    similar_text($nomecartao[$i], $nomepessoa[$j],$persim);
-                    //echo $nomecartao[$i] . '=' . $nomepessoa[$j] . ' - ' . (similar_text($nomecartao[$i], $nomepessoa[$j], $per)) .' | ' . "($per) <br/> ";
-                    
-                    if ($nomecartao[$i][0] == $nomepessoa[$j][0] && $persim >= 70) {
-                        $encontrou = true;
-                        $acertos++;
-                    }
-                    else if($nomecartao[$i][0] != $nomepessoa[$j][0]) {
-                        $inicial += 1;
-                    }                                        
-                }
-            }
-        }
         
-        //var_dump($inicial);
-        //var_dump($acertos);
-        //var_dump($objetivo_comparacoes);
-        //var_dump(($totalCompare - $inicial) <= $minCompare);
-        //var_dump(($acertos == $objetivo_comparacoes || $acertos == $objetivo_comparacoes - 1) && ($totalCompare - $inicial) <= $minCompare);
-        if (($acertos == $objetivo_comparacoes || $acertos == $objetivo_comparacoes - 1) && (($totalCompare - $inicial) <= $minCompare)) {
-            return true;
-        }
-    }
-    
-	/**
-	 * Validação server side das informações do formulário do pagamento.
-	 *
-	 */
-    public function validate() {
-    	parent::validate();
-        
-        $info = $this->getInfoInstance();
-        
-    	$cartaobandeira     = str_replace("cc_", "", $info->getCcType());
-        $nomecartao         = $info->getCcOwner();
-    	$numerocartao       = $info->decrypt($info->getCcNumberEnc());
-    	$expiracaomes       = $info->getCcExpMonth();
-    	$expiracaoano       = $info->getCcExpYear();
-    	$codseguranca       = $info->decrypt($info->getCcCidEnc());
-    	$tefbandeira        = $info->getBandeiraTef();
-    	//$formapagamento     = $info->getCheckFormapagamento();
-        $additionaldata     = $info->getAdditionalData();
-        
-    	if(!$additionaldata['forma_pagamento']) {
-    		$errorCode = 'invalid_data';
-    		$errorMsg = $this->_getHelper()->__('Selecione uma forma de pagamento');
-    		Mage::throwException($errorMsg);
-    	}
-        
-    	if($additionaldata['forma_pagamento'] == "cartao") {
-    		if(empty($cartaobandeira) || empty($nomecartao) || empty($numerocartao) || empty($expiracaomes) || empty($expiracaoano) || empty($codseguranca)) {
-                $errorCode = 'invalid_data';
-                $errorMsg = $this->_getHelper()->__('Campos de preenchimento obrigatório');
-                
-                Mage::throwException($errorMsg);
-            }
-    	}
-        
-    	return $this;
-    }
-    
 }

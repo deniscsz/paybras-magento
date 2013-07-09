@@ -3,14 +3,14 @@
  * Paybras
  *
  * @category   Payments
- * @package    Xpd_Paybras
+ * @package    Xpd_Paybrasweb
  * @license    OSL v3.0
  */
-class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
+class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 
-    protected $_code = 'paybras';
-    protected $_formBlockType = 'paybras/form_cc';
-    protected $_infoBlockType = 'paybras/info';
+    protected $_code = 'paybrasweb';
+    protected $_formBlockType = 'paybrasweb/form';
+    protected $_infoBlockType = 'paybrasweb/info';
     protected $_isInitializeNeeded = true;
     
     protected $_canUseInternal = true;
@@ -62,7 +62,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @param bool $forceLog
      */
     public function log($message, $level = null, $file = 'paybras.log', $forceLog = false) {
-        Mage::log("Paybras - " . $message, $level, 'paybras.log', $forceLog);
+        Mage::log("PaybrasWeb - " . $message, $level, 'paybras.log', $forceLog);
     }
     
     /**
@@ -71,7 +71,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getOrderPlaceRedirectUrl() {
-        return Mage::getUrl('paybras/standard/redirect', array('_secure' => true));
+        return Mage::getUrl('paybrasweb/standard/redirect', array('_secure' => true));
     }
     
     /**
@@ -80,7 +80,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return int
      */
     public function getEnvironment() {
-        return Mage::getStoreConfig('payment/paybras/environment');
+        return Mage::getStoreConfig('payment/paybrasweb/environment');
     }
     
     /**
@@ -89,7 +89,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getEmailStore() {
-        return Mage::getStoreConfig('payment/paybras/emailstore');
+        return Mage::getStoreConfig('payment/paybrasweb/emailstore');
     }
     
     /**
@@ -98,7 +98,25 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return string
      */
     public function getToken() {
-        return Mage::getStoreConfig('payment/paybras/token');
+        return Mage::getStoreConfig('payment/paybrasweb/token');
+    }
+    
+    /**
+     * Captura IP do Cliente
+     * 
+     * @return string $ip
+     */ 
+    public function getIpClient() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }
+        elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+        else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
     }
         
     /**
@@ -107,29 +125,27 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 	 * @param $data - Informação adiquirida do método de pagamento.
      * @return Mage_Payment_Model_Method_Cc
      */
-    public function assignData($data) {
+    /*public function assignData($data) {
         $details = array();
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
         $info = $this->getInfoInstance();
-        $additionaldata = array('cc_parcelas' => $data->getCcParcelas(), 'cc_cid_enc' => $info->encrypt($data->getCcCid()), 'cpf_titular' => $data->getCcCpftitular(), 'day_titular' => $data->getCcDobDay(), 'month_titular' => $data->getCcDobMonth(), 'year_titular' => $data->getCcDobYear(), 'tel_titular' => $data->getPhone(), 'forma_pagamento' => $data->getCheckFormapagamento(), 'tef_banco' => $data->getTefBanco());
-        $info->setAdditionalData(serialize($additionaldata));
-        $info->setCcType($data->getCcType());
-        $info->setCcOwner($data->getCcOwner());
-        $info->setCcExpMonth($data->getCcExpMonth());
-        $info->setCcExpYear($data->getCcExpYear());
+        //$additionaldata = array('cc_parcelas' => $data->getCcParcelas(), 'cc_cid_enc' => $info->encrypt($data->getCcCid()), 'cpf_titular' => $data->getCcCpftitular(), 'day_titular' => $data->getCcDobDay(), 'month_titular' => $data->getCcDobMonth(), 'year_titular' => $data->getCcDobYear(), 'tel_titular' => $data->getPhone(), 'forma_pagamento' => $data->getCheckFormapagamento(), 'tef_banco' => $data->getTefBanco());
+        //$info->setAdditionalData(serialize($additionaldata));
+        //$info->setCcType($data->getCcType());
+        //$info->setCcOwner($data->getCcOwner());
+        //$info->setCcExpMonth($data->getCcExpMonth());
+        /*$info->setCcExpYear($data->getCcExpYear());
         $info->setCcNumberEnc($info->encrypt($data->getCcNumber()));
         $info->setCcCidEnc($info->encrypt($data->getCcCid()));
-        $info->setCcLast4(substr($data->getCcNumber(), -4));
-        
-        $this->formaPagamento = $data->getCheckFormapagamento();
+        $info->setCcLast4(substr($data->getCcNumber(), -4));*/
         
         //Mage::log($this->formaPagamento);
         //Mage::getSingleton('core/session')->setFormaPagamento($data->getCheckFormapagamento);
         //Mage::log(Mage::getSingleton('core/session')->getFormaPagamento());
-        return $this;
-    }
+        /*return $this;
+    }*/
     
     /**
      * Recupera os dados necessários para a criacão de uma transação
@@ -206,40 +222,16 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         
         $fields['pagador_sexo'] = $order->getCustomerGender();
         
-        $additionaldata = unserialize($payment->getData('additional_data'));
-        $this->formaPagamento = $additionaldata['forma_pagamento'];
-        
-        /* Dados do Cartão */
-        if($additionaldata['forma_pagamento'] == "cartao") {
-            $fields['cartao_portador_nome'] = $payment->getCcOwner();
-            $fields['cartao_numero'] = $payment->decrypt($payment->getCcNumberEnc());
-            $fields['cartao_bandeira'] = $payment->getData('cc_type');
-            $fields['cartao_validade_mes'] = str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
-            $fields['cartao_validade_ano'] = substr($payment->getCcExpYear(),-2);
-            $fields['cartao_parcelas'] = $additionaldata['cc_parcelas'];
-            $fields['cartao_codigo_de_seguranca'] = $payment->decrypt($additionaldata['cc_cid_enc']);
-            $fields['numberPayment'] = $additionaldata['cc_parcelas'];
-            
-            $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
-            if(!$samePerson) {
-                $telefone = $additionaldata['tel_titular'];
-                $fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
-                $fields['cartao_portador_telefone'] = substr($telefone,2);
-                $fields['cartao_portador_cpf'] = $additionaldata['cpf_titular'];
-                $fields['cartao_portador_data_de_nascimento'] = ($additionaldata['day_titular'] < 10 ? '0' . $additionaldata['day_titular'] : $additionaldata['day_titular']). '/' . ($additionaldata['month_titular'] < 10 ? '0' . $additionaldata['month_titular'] : $additionaldata['month_titular']) . '/' . $additionaldata['year_titular'];
-            }
+        $meiosPag = Mage::getStoreConfig('payment/paybrasweb/emailstore');
+        $fields['pedido_tipos_pgto'] = '';
+        foreach($meiosPag as $meio) {
+            $fields['pedido_tipos_pgto'] = $meio['value'];
         }
-        if($additionaldata['forma_pagamento'] == 'tef_bb') {
-            $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybras/standard/success/';
-			$fields['pedido_meio_pagamento'] = $additionaldata['tef_banco'];
-        }
-		else {
-			$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
-		}
         
-        //$fields['pedido_meio_pagamento'] = $additionaldata['forma_pagamento'];
+        $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybrasweb/retorno';
         $fields['pedido_id'] = $order->getIncrementId();
         $fields['pedido_valor_total_original'] = number_format($order->getGrandTotal(), 2, '.', '');
+        $fields['pagador_ip'] = $this->getIpClient();
         
         /* Endereço do Pagador */
         if($billingAddress) {
@@ -396,7 +388,6 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             if ($order->canCancel()) {
                 $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
         		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
-                $order->cancel();
 				$order->save();
         		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;
@@ -454,8 +445,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return Mage_Sales_Model_Order
      */
     public function convertState($num,$repay = NULL) {
-        Mage::log('O repay eh '.$repay);
-		if($repay != NULL) {
+		if($repay) {
 			switch($num) {
 				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
@@ -485,7 +475,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      */
     public function convertStatus($num,$repay = NULL) {
         $num = (int)$num;
-		if($repay != NULL) {
+		if($repay) {
 			switch($num) {
 				case 1: return 'pending_payment';
 				case 2: return 'holded';
@@ -610,42 +600,5 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             return true;
         }
     }
-    
-	/**
-	 * Validação server side das informações do formulário do pagamento.
-	 *
-	 */
-    public function validate() {
-    	parent::validate();
         
-        $info = $this->getInfoInstance();
-        
-    	$cartaobandeira     = str_replace("cc_", "", $info->getCcType());
-        $nomecartao         = $info->getCcOwner();
-    	$numerocartao       = $info->decrypt($info->getCcNumberEnc());
-    	$expiracaomes       = $info->getCcExpMonth();
-    	$expiracaoano       = $info->getCcExpYear();
-    	$codseguranca       = $info->decrypt($info->getCcCidEnc());
-    	$tefbandeira        = $info->getBandeiraTef();
-    	//$formapagamento     = $info->getCheckFormapagamento();
-        $additionaldata     = $info->getAdditionalData();
-        
-    	if(!$additionaldata['forma_pagamento']) {
-    		$errorCode = 'invalid_data';
-    		$errorMsg = $this->_getHelper()->__('Selecione uma forma de pagamento');
-    		Mage::throwException($errorMsg);
-    	}
-        
-    	if($additionaldata['forma_pagamento'] == "cartao") {
-    		if(empty($cartaobandeira) || empty($nomecartao) || empty($numerocartao) || empty($expiracaomes) || empty($expiracaoano) || empty($codseguranca)) {
-                $errorCode = 'invalid_data';
-                $errorMsg = $this->_getHelper()->__('Campos de preenchimento obrigatório');
-                
-                Mage::throwException($errorMsg);
-            }
-    	}
-        
-    	return $this;
-    }
-    
 }
