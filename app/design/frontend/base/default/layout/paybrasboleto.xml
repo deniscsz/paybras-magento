@@ -3,15 +3,15 @@
     
     <default>
         <reference name="head">
-            <!--action method="addItem" ifconfig="payment/paybrasboleto/active"><type>skin_css</type><name>css/paybras/paybras.css</name></action-->
-            <action method="addItem" ifconfig="payment/paybrasboleto/unico"><type>skin_js</type><name>js/paybras/prototype.maskedinput.js</name></action>
-			<!--action method="addItem" ifconfig="payment/paybrasboleto/active"><type>skin_js</type><name>js/paybras/paybras.js</name></action-->
+            <action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_css</type><name>css/paybras/paybras.css</name></action>
+            <action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_js</type><name>js/paybras/prototype.maskedinput.js</name></action>
+			<action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
         </reference>
     </default>
     
 	<customer_account_index>
         <reference name="customer_account_dashboard_top">
-            <action method="setTemplate"><template>xpd/paybrasboleto/sales/order/recent.phtml</template></action>
+            <action method="setTemplate" ifconfig="payment/paybrastef/unico"><template>xpd/paybrasboleto/sales/order/recent.phtml</template></action>
         </reference>
     </customer_account_index>
 	

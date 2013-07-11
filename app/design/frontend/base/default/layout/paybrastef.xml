@@ -3,9 +3,9 @@
     
     <default>
         <reference name="head">
-            <!--action method="addItem" ifconfig="payment/paybrastef/active"><type>skin_css</type><name>css/paybras/paybras.css</name></action-->
+            <action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_css</type><name>css/paybras/paybras.css</name></action>
             <action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_js</type><name>js/paybras/prototype.maskedinput.js</name></action>
-			<!--action method="addItem" ifconfig="payment/paybrastef/active"><type>skin_js</type><name>js/paybras/paybras.js</name></action-->
+			<action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
         </reference>
     </default>
     

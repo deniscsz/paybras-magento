@@ -225,13 +225,14 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $meiosPag = Mage::getStoreConfig('payment/paybrasweb/emailstore');
         $fields['pedido_tipos_pgto'] = '';
         foreach($meiosPag as $meio) {
-            $fields['pedido_tipos_pgto'] = $meio['value'];
+            $fields['pedido_tipos_pgto'] .= $meio['value'];
         }
         
         $fields['pedido_url_redirecionamento'] = Mage::getBaseUrl() . 'paybrasweb/retorno';
         $fields['pedido_id'] = $order->getIncrementId();
         $fields['pedido_valor_total_original'] = number_format($order->getGrandTotal(), 2, '.', '');
         $fields['pagador_ip'] = $this->getIpClient();
+        $fields['recebedor_url_retorno'] = Mage::getBaseUrl() . 'paybrasweb/standard/retorno';
         
         /* Endereço do Pagador */
         if($billingAddress) {
@@ -313,34 +314,11 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $count += 1;
         }
         $fields['pedido_moeda'] = Mage::app()->getStore()->getCurrentCurrencyCode();
-		
-		if($post) {
-			$fields['cartao_portador_nome'] = $post['cartao_portador_nome'];
-            $fields['cartao_numero'] = $post['cartao_numero'];
-            $fields['cartao_bandeira'] = $post['cc_type'];
-            $fields['cartao_validade_mes'] = $post['cartao_validade_mes'];
-            $fields['cartao_validade_ano'] = $post['cartao_validade_ano'];
-            $fields['cartao_parcelas'] = $post['cartao_parcelas'];
-            $fields['cartao_codigo_de_seguranca'] = $post['cartao_codigo_de_seguranca'];
+        
+        if($post) {
 			$fields['pedido_id'] = $order->getIncrementId().'_1';
-            
-            $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
-            if(!$samePerson) {
-                $telefone = $post['cartao_portador_telefone'];
-				if($telefone) {
-					$telefone = str_replace(')','',str_replace('(','',$telefone)); 
-					$fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
-					$fields['cartao_portador_telefone'] = substr($telefone,2);
-				}
-                if($post['cartao_portador_cpf']) {
-					$fields['cartao_portador_cpf'] = $post['cartao_portador_cpf'];
-				}
-				if($post['cartao_portador_data_de_nascimento']) {
-					$fields['cartao_portador_data_de_nascimento'] = $post['cartao_portador_data_de_nascimento'];
-				}
-            }
-		}
-		
+        }
+				
         return $fields;
     }
     

@@ -10,7 +10,7 @@ class Xpd_Paybrasweb_Block_Standard_Success extends Mage_Core_Block_Template {
 	
 	protected function _construct() {
         parent::_construct();
-        $this->setTemplate('xpd/paybras/standard/success.phtml');
+        $this->setTemplate('xpd/paybras/standard/retorno.phtml');
     }
 	
 }
