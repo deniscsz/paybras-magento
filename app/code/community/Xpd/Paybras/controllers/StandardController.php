@@ -251,6 +251,10 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                   ->getFirstItem();
         }
         
+		if(!$order) {
+            die();
+        }
+		
 		$order_payment = $order->getPayment();
 		
         if($order && $paybras->getCode() == $order_payment->getMethodInstance()->getCode()) {

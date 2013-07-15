@@ -396,7 +396,9 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             if ($order->canCancel()) {
                 $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
         		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
-                $order->cancel();
+                if($repay) {
+					$order->cancel();
+				}
 				$order->save();
         		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;

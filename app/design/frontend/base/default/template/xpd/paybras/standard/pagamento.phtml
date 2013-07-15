@@ -64,7 +64,30 @@ Event.observe(window, "load", function() {
 			if ((cpf.charAt(9) != a[9]) || (cpf.charAt(10) != a[10]) || cpf.match(expReg)) return false;
 			return true;
 	});
+	
+	Validation.add('cccard','Cartão Inválido',function(ccnum) {
+		ccnum = ccnum.split("-").join("");
+	
+		var checksum = 0;
+		for (var i=(2-(ccnum.length % 2)); i<=ccnum.length; i+=2) {
+			checksum += parseInt(ccnum.charAt(i-1));
+		}
+		
+		for (var i=(ccnum.length % 2) + 1; i<ccnum.length; i+=2) {
+			var digit = parseInt(ccnum.charAt(i-1)) * 2;
+			if (digit < 10) { checksum += digit; } else { checksum += (digit-9); }
+		}
+		
+		if ((checksum % 10) == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	});
 });
+
+	
 </script>
 
 <style type="text/css">
@@ -122,7 +145,7 @@ Event.observe(window, "load", function() {
 		
 		<div class="control-group">
 			<label class='tituloInput'>Número*</label>
-			<input value='' id="paybras_cc_number" name="cartao_numero" class="cartao required-entry" type="text" onfocus="mascara(this,numeros)" onblur="mascara(this,numeros);verifyType(this);" class="required-entry" value="" maxlength="16" />
+			<input value='' id="paybras_cc_number" name="cartao_numero" class="cartao required-entry cccard" type="text" onfocus="mascara(this,numeros)" onblur="mascara(this,numeros);verifyType(this);" value="" maxlength="16" />
 		</div>
 		
 		<div class="control-group">
