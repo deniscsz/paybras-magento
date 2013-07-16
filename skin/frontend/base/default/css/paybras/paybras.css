@@ -148,13 +148,18 @@
     vertical-align:bottom;
     display:block;
     position:relative;
-    width: 60px;
+    /*width: 60px;*/
+	width: 50px;
     margin-bottom: 0;
     padding-bottom: 0;
 }
 
 #cc .card-logo li label {
     padding-left: 5px;
+}
+
+#cc .card-logo li label IMG {
+    width: 45px;
 }
 
 #cc .card-logo li .validation-advice {

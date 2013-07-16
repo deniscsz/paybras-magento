@@ -108,6 +108,24 @@
         		</ul>
             </div>
         </li>
+		
+		<?php if(Mage::getStoreConfig('payment/paybras/installments')): ?>
+		<li style="margin-bottom: 20px;">
+            <label for="<?php echo $_code ?>_parcelas"><?php echo $this->__('Parcelas') ?> </label><br />
+            <div class="input-box">
+                <select id="<?php echo $_code ?>_cc_parcelas" name="payment[cc_parcelas]" class="required-entry">
+    		<?php $j=1; foreach($this->getParcelas() as $parcela): ?>
+                    <?php if($j == 1): ?>
+                    <option value="<?php echo $j; ?>"><?php echo 'À vista - '.$this->helper('checkout')->formatPrice($parcela); ?></option>
+                    <?php else: ?>
+    				<option value="<?php echo $j ?>"><?php echo $j.'x - '.$this->helper('checkout')->formatPrice($parcela).' = '. $this->helper('checkout')->formatPrice($parcela*$j); ?></option>
+                    <?php endif; ?>
+    		<?php $j+=1; endforeach; ?>
+                </select>
+            </div>
+        </li>
+		<?php endif; ?>
+		
         <li>
             <div class="input-box">
                 <label for="<?php echo $_code ?>_cc_owner" class="required"><em>*</em><?php echo $this->__('Name on Card') ?></label><br />
@@ -153,21 +171,7 @@
             </div>
         </li>
         <?php endif; ?>
-        <li style="margin-bottom: 20px;">
-            <label for="<?php echo $_code ?>_parcelas"><?php echo $this->__('Parcelas') ?> </label><br />
-            <div class="input-box">
-                <select id="<?php echo $_code ?>_cc_parcelas" name="payment[cc_parcelas]" class="required-entry">
-    		<?php $j=1; foreach($this->getParcelas() as $parcela): ?>
-                    <?php if($j == 1): ?>
-                    <option value="<?php echo $j; ?>"><?php echo 'À vista - '.$this->helper('checkout')->formatPrice($parcela); ?></option>
-                    <?php else: ?>
-    				<option value="<?php echo $j ?>"><?php echo $j.'x - '.$this->helper('checkout')->formatPrice($parcela).' = '. $this->helper('checkout')->formatPrice($parcela*$j); ?></option>
-                    <?php endif; ?>
-    		<?php $j+=1; endforeach; ?>
-                </select>
-            </div>
-        </li>
-        
+                
         <li id="<?php echo $_code ?>_cc_cpftitular_div" style="display: none;">
             <label for="<?php echo $_code ?>_cc_cpftitular" class="required"><em>*</em><?php echo $this->__("TAX/VAT of Card's Owner") ?></label><br />
             <div class="input-box">

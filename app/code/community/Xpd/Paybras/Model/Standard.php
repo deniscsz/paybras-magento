@@ -389,7 +389,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                 return -1;
             }
         }
-        elseif ($status == 3 || $status == 5) {
+        elseif ($status == 3) {
             if ($order->canUnhold()) {
 	           $order->unhold();
             }
@@ -399,6 +399,29 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                 if($repay) {
 					$order->cancel();
 				}
+				$order->save();
+        		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+                return 0;
+            }
+            else {
+                $this->log("Pedido não pode ser Cancelada.");
+                return -1;
+            }
+        }
+		elseif ($status == 5 || $status == 6) {
+            if ($order->canUnhold()) {
+	           $order->unhold();
+            }
+            if ($order->canCancel()) {
+				if($status == 5) {
+					$order_msg = "Pedido Cancelado. Transação: ". $transactionId;
+				}
+				if($status == 6) {
+					$order_msg = "Pedido Devolvido. Transação: ". $transactionId;
+				}
+        		$order = $this->changeState($order,$status,NULL,$order_msg,1);
+				$order->cancel();
+				
 				$order->save();
         		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
                 return 0;
