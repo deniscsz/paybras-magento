@@ -16,5 +16,5 @@
 <p>O status do seu pedido é: <?php echo $session->getStatusPag(); ?>.</p>
 <?php if ($error = $this->getErrorMessage()) : ?><p><?php echo $error ?></p><?php endif ?>
 <?php if ($error = $session->getMsgPaybrasErro()) : ?><p><?php echo $error ?></p><?php endif ?>
-<p><?php echo $this->__('Clique <a href="%s">aqui</a> para voltar para continuar comprando.', Mage::getBaseUrl()) ?> ou faça uma nova tentativa de pagamento clicando <a href="<?php echo Mage::getBaseUrl('paybras/standard/pagamento/order_id/'.$session->getPayOrderId()); ?>">Aqui</a></p>
+<p><?php echo $this->__('Clique <a href="%s">aqui</a> para voltar para continuar comprando.', Mage::getBaseUrl()) ?> ou faça uma nova tentativa de pagamento clicando <a href="<?php echo Mage::getBaseUrl() . 'paybras/standard/pagamento/order_id/'.$session->getPayOrderId(); ?>">Aqui</a></p>
 <?php $session->unsMsgPaybrasErro(); $session->clear(); ?>
