@@ -57,7 +57,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         }
 
         $fields = $paybras->dataTransaction($customer,$order,$payment);
-        
+        Mage::log(json_encode($fields));
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
         $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);

@@ -308,16 +308,16 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $items = $order->getAllVisibleItems();
         $count = 0;
         foreach ($items as $item) {
-            $fields['produto'][$count]['produto_codigo'] = $item->getSku();
-            $fields['produto'][$count]['produto_nome'] = $item->getName();
-            $fields['produto'][$count]['produto_qtd'] = $item->getQtyOrdered(); 
-            if(true) {
-                $fields['produto'][$count]['produto_peso'] = number_format($item->getWeight(), '2');
+            $fields['produtos'][$count]['produto_codigo'] = $item->getSku();
+            $fields['produtos'][$count]['produto_nome'] = $item->getName();
+            $fields['produtos'][$count]['produto_qtd'] = $item->getQtyOrdered(); 
+            if($item->getWeight() < 500.00) {
+                $fields['produtos'][$count]['produto_peso'] = number_format($item->getWeight(), '2');
             }
             else {
-                $fields['produto'][$count]['produto_peso'] = number_format($item->getWeight()/1000, '2');
+                $fields['produtos'][$count]['produto_peso'] = number_format($item->getWeight()/1000, '2');
             }
-            $fields['produto'][$count]['produto_valor'] = number_format(($item->getFinalPrice() ? $item->getFinalPrice() : $item->getPrice()), '2');
+            $fields['produtos'][$count]['produto_valor'] = number_format(($item->getFinalPrice() ? $item->getFinalPrice() : $item->getPrice()), '2');
             $count += 1;
         }
         $fields['pedido_moeda'] = Mage::app()->getStore()->getCurrentCurrencyCode();
