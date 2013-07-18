@@ -214,7 +214,7 @@
 	<?php 
 	$magento = new Mage;
 	$version = $magento->getVersion();
-	if(substr($version,0,2) == '1.7' || substr($version,0,2) == '1.8'): ?>
+	if(substr($version,0,3) == '1.7' || substr($version,0,3) == '1.8'): ?>
 	countryRegions = <?php echo $this->helper('directory')->getRegionJson(); ?>;
 	<?php endif; ?>
     //billingForm.setElementsRelation('billing:country_id', 'billing:region', '<?php echo $this->getUrl('directory/json/childRegion') ?>', '<?php echo $this->__('Select State/Province...') ?>');

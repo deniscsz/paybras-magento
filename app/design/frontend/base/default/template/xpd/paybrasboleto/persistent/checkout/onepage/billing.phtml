@@ -211,6 +211,12 @@
     var billing = new Billing('co-billing-form', '<?php echo $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?php echo $this->getUrl('checkout/onepage/saveBilling') ?>');
     var billingForm = new VarienForm('co-billing-form');
 
+	<?php $magento = new Mage;
+	$version = $magento->getVersion();
+	if(substr($version,0,3) == '1.7' || substr($version,0,3) == '1.8'): ?>
+	countryRegions = <?php echo $this->helper('directory')->getRegionJson(); ?>;
+	<?php endif; ?>
+	
     //billingForm.setElementsRelation('billing:country_id', 'billing:region', '<?php echo $this->getUrl('directory/json/childRegion') ?>', '<?php echo $this->__('Select State/Province...') ?>');
     $('billing-address-select') && billing.newAddress(!$('billing-address-select').value);
 

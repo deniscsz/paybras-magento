@@ -161,6 +161,13 @@
     var shipping = new Shipping('co-shipping-form', '<?php echo $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?php echo $this->getUrl('checkout/onepage/saveShipping') ?>',
         '<?php echo $this->getUrl('checkout/onepage/shippingMethod') ?>');
     var shippingForm = new VarienForm('co-shipping-form');
+	
+	<?php $magento = new Mage;
+	$version = $magento->getVersion();
+	if(substr($version,0,3) == '1.7' || substr($version,0,3) == '1.8'): ?>
+	countryRegions = <?php echo $this->helper('directory')->getRegionJson(); ?>;
+	<?php endif; ?>
+	
     shippingForm.extraChildParams = ' onchange="shipping.setSameAsBilling(false);"';
     //shippingForm.setElementsRelation('shipping:country_id', 'shipping:region', '<?php echo $this->getUrl('directory/json/childRegion') ?>', '<?php echo $this->__('Select State/Province...') ?>');
     $('shipping-address-select') && shipping.newAddress(!$('shipping-address-select').value);
