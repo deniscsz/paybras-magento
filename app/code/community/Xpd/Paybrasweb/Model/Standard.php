@@ -205,7 +205,7 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         if($order->getCustomerDob()) {
             $dateTimestamp = Mage::getModel('core/date')->timestamp(strtotime($order->getCustomerDob())) + 15000;
             $fields['pagador_data_nascimento'] = date('d-m-Y', $dateTimestamp);
-			$fields['pagador_data_nascimento'] = str_replace('-','/',$celular);
+			$fields['pagador_data_nascimento'] = str_replace('-','/',$fields['pagador_data_nascimento']);
         }
         
         $telefone = $billingAddress->getData('telephone');

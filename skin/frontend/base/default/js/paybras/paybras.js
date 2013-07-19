@@ -193,24 +193,29 @@ function verifyType(element) {
     if(visaReg.test(ccnum)) {
         $('opt-visa').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        maskcid.unmask().mask('999');
         $('opt-visa').previous(0).addClassName('selecionada');
     } else if(masterReg.test(ccnum)) {
         $('opt-mastercard').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        maskcid.unmask().mask('999');
         $('opt-mastercard').previous(0).addClassName('selecionada');
     } else if(amexReg.test(ccnum)) {
         $('opt-amex').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 4);
+        maskcid.unmask().mask('9999');
         $('opt-amex').previous(0).addClassName('selecionada');
     } else if(dinersReg.test(ccnum)) {
         $('opt-diners').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
+        maskcid.unmask().mask('999');
         $('opt-diners').previous(0).addClassName('selecionada');
     } else if(discoverReg.test(ccnum)) {
         //$('opt-visa').checked=true;
     } else {
         $('paybras_cc_cid').setAttribute('maxlength', 3);
-        if(ccnum.length < 14) {
+        maskcid.unmask().mask('999');
+        if(ccnum.length < 16) {
         }
         else {
             $('opt-elo').checked = true;
