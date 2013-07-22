@@ -65,6 +65,26 @@
                 if ((cpf.charAt(9) != a[9]) || (cpf.charAt(10) != a[10]) || cpf.match(expReg)) return false;
                 return true;
     });
+    
+    
+    isSelected = function() {
+        //if($('advice-required-entry-paybras_cc_type'))
+        //    $('advice-required-entry-paybras_cc_type').remove();
+            
+        var radioObj = $$('.card-logo .radio');
+    
+        for(var i=0; i<radioObj.length; i++) {
+            if( radioObj[i].checked ) {
+                return true;
+            }
+        }
+        
+        //$$('.valida-bandeira').first().insert({after: '<div class="validation-advice" id="advice-required-entry-paybras_cc_type" style="">Selecione uma bandeira.</div>'});
+        
+        return false;
+    };
+    
+    Validation.add('radioss','Selecione uma Bandeira',function() { /*alert(isSelected());*/ return isSelected(); });
 
     Validation.add('cccard','Cartão Inválido',function(ccnum) {
         ccnum = ccnum.split("-").join("");
@@ -80,12 +100,18 @@
         }
         
         if ((checksum % 10) == 0) {
-            return true;
+            if(isSelected()) {
+                return true;
+            }
         }
         else {
+            $$('.card-logo input[type="radio"]:checked').each(function(c){
+                $(c).checked = false;
+            });
             return false;
         }
     });
+
 </script>
 <fieldset class="form-list">
 <?php $_ccType = $this->getInfoData('cc_type') ?>
@@ -95,9 +121,9 @@
     <li id="li-cc">
     <ul id="cc">
 
-        <li  style="display: block">
+        <li class="valida-bandeira" style="display: block">
             <div class="input-box" style="width: 100%;">
-                <ul class="card-logo">
+                <ul class="card-logo" >
         		<?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
         			<li id="li-card-<?php echo $_typeCode ?>" class="seleciona-bandeiras-cards">
         				<label for="opt-<?php echo $_typeCode ?>"><img src="<?php echo $this->getSkinUrl('images/paybras/'.$_typeCode.'/'. $parcela_count .'x.gif') ?>" /></label>
@@ -106,6 +132,7 @@
         			</li>
         		<?php endforeach; ?>
         		</ul>
+                <input type="hidden" class="radioss" />
             </div>
         </li>
 		
@@ -222,6 +249,6 @@
     </li>
         
     <input title="<?php echo $this->__('Escolha da Forma de Pagamento') ?>" name="payment[check_formapagamento]" type="hidden" id="<?php echo $_code ?>_check_formapagamento" value="cartao" />
-    
+    <script type="text/javascript"></script>
 </ul>
 </fieldset>

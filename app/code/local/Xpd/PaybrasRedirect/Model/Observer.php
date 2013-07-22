@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 class Xpd_PaybrasRedirect_Model_Observer
 {
 
