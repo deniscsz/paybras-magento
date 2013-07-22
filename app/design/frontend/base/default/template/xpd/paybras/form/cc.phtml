@@ -104,6 +104,9 @@
             $$('.card-logo input[type="radio"]:checked').each(function(c){
                 $(c).checked = false;
             });
+            $$('.seleciona-bandeiras-cards label').each(function(e,i){
+                $(e).removeClassName('selecionada');
+            });
             return false;
         }
     });

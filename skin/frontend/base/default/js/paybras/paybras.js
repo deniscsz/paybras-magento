@@ -189,35 +189,37 @@ function verifyType(element) {
     $$('.seleciona-bandeiras-cards label').each(function(e,i){
         $(e).removeClassName('selecionada');
     });
+    $('opt-visa').checked = false;
+    $('opt-mastercard').checked = false;
+    $('opt-amex').checked = false;
+    $('opt-diners').checked = false;
+    $('opt-elo').checked = false;
     
-    if(visaReg.test(ccnum)) {
+    if(visaReg.test(ccnum) && ccnum.length == 16) {
         $('opt-visa').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
         maskcid.unmask().mask('999');
         $('opt-visa').previous(0).addClassName('selecionada');
-    } else if(masterReg.test(ccnum)) {
+    } else if(masterReg.test(ccnum) && ccnum.length == 16) {
         $('opt-mastercard').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
         maskcid.unmask().mask('999');
         $('opt-mastercard').previous(0).addClassName('selecionada');
-    } else if(amexReg.test(ccnum)) {
+    } else if(amexReg.test(ccnum) && ccnum.length == 15) {
         $('opt-amex').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 4);
         maskcid.unmask().mask('9999');
         $('opt-amex').previous(0).addClassName('selecionada');
-    } else if(dinersReg.test(ccnum)) {
+    } else if(dinersReg.test(ccnum) && ccnum.length == 14) {
         $('opt-diners').checked = true;
         $('paybras_cc_cid').setAttribute('maxlength', 3);
         maskcid.unmask().mask('999');
         $('opt-diners').previous(0).addClassName('selecionada');
-    } else if(discoverReg.test(ccnum)) {
-        //$('opt-visa').checked=true;
     } else {
         $('paybras_cc_cid').setAttribute('maxlength', 3);
         maskcid.unmask().mask('999');
-        if(ccnum.length < 16) {
-        }
-        else {
+        
+        if((/^(636368|504175|438935|451416|636297)/).test(ccnum) && ccnum.length == 16) {
             $('opt-elo').checked = true;
             $('opt-elo').previous(0).addClassName('selecionada');
         }
