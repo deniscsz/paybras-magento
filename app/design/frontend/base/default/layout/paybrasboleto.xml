@@ -41,6 +41,12 @@
             <action method="setTemplate" ifconfig="payment/paybrasboleto/unico"><template>xpd/paybrasboleto/customer/address/edit.phtml</template></action>
         </reference>
     </customer_address_form>
+    
+    <sales_order_history translate="label">
+        <reference name="sales.order.history">
+            <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/sales/order/history.phtml</template></action>
+        </reference>
+    </sales_order_history>
 	
     <checkout_onepage_success translate="label">
         <reference name="root">

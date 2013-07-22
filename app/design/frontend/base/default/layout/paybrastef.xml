@@ -35,6 +35,12 @@
 			<action method="addItem" ifconfig="payment/paybrastef/unico"><type>skin_js</type><name>js/paybras/paybras.js</name></action>
 		</reference>
     </customer_account_create>
+    
+    <sales_order_history translate="label">
+        <reference name="sales.order.history">
+            <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/sales/order/history.phtml</template></action>
+        </reference>
+    </sales_order_history>
 	
 	<customer_address_form>
         <reference name="customer_address_edit">
