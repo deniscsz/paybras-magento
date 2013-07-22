@@ -60,7 +60,7 @@ class Xpd_Paybrasboleto_StandardController extends Mage_Core_Controller_Front_Ac
         
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
-        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
@@ -200,7 +200,7 @@ class Xpd_Paybrasboleto_StandardController extends Mage_Core_Controller_Front_Ac
 				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
                 $curlAdapter->setConfig(array('timeout' => 20));
-                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
                 $resposta = $curlAdapter->read();
                 $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
                 $curlAdapter->close();

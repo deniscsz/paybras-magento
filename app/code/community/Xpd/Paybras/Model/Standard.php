@@ -320,6 +320,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $fields['produtos'][$count]['produto_valor'] = number_format(($item->getFinalPrice() ? $item->getFinalPrice() : $item->getPrice()), '2');
             $count += 1;
         }
+        
         $fields['pedido_moeda'] = Mage::app()->getStore()->getCurrentCurrencyCode();
 		
 		if($post) {

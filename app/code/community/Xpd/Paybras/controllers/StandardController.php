@@ -60,14 +60,14 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         Mage::log(json_encode($fields));
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
-        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
-        
+        //Mage::log($retorno);
         if(function_exists('json_decode')) {
             $json_php = json_decode($retorno);
-            
+            Mage::log($retorno);
             if($json_php->{'sucesso'} == '1') {
                 $paybras->log('True para consulta');
                 $flag = true;
@@ -171,7 +171,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 			
 			$curlAdapter = new Varien_Http_Adapter_Curl();
 			$curlAdapter->setConfig(array('timeout'   => 20));
-			$curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+			$curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
 			$resposta = $curlAdapter->read();
 			$retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
 			$curlAdapter->close();
@@ -303,7 +303,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
         //$curlAdapter->connect(your_host[, opt_port, opt_secure]);
-        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
@@ -399,7 +399,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
                 $curlAdapter->setConfig(array('timeout' => 20));
-                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
                 $resposta = $curlAdapter->read();
                 $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
                 $curlAdapter->close();

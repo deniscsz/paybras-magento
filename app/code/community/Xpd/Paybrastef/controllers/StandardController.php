@@ -60,7 +60,7 @@ class Xpd_Paybrastef_StandardController extends Mage_Core_Controller_Front_Actio
         
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
-        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
@@ -199,7 +199,7 @@ class Xpd_Paybrastef_StandardController extends Mage_Core_Controller_Front_Actio
 				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
                 $curlAdapter->setConfig(array('timeout' => 20));
-                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+                $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
                 $resposta = $curlAdapter->read();
                 $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
                 $curlAdapter->close();
@@ -230,45 +230,5 @@ class Xpd_Paybrastef_StandardController extends Mage_Core_Controller_Front_Actio
 			$paybras->log('Fim da Captura');
         }
     }
-    	
-	/**
-     * Exibe tela de sucesso após tentativa de repagamento
-     * 
-     *//*
-    public function successAction() {
-		$session = Mage::getSingleton('core/session');
-		$paybras = Mage::getSingleton('paybras/standard');
-		$orderId = $session->getPayOrderId();
-        
-		if(strlen((string)$orderId)<9) {
-			$order = Mage::getModel('sales/order')->load((int)$orderId);
-		}
-		else {
-			$order = Mage::getModel('sales/order')
-				  ->getCollection()
-				  ->addAttributeToFilter('increment_id', $orderId)
-				  ->getFirstItem();
-		}
-		
-		$this->loadLayout();
-		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');			
-		$block = $this->getLayout()->createBlock('Xpd_Paybras_Block_Standard_Success','block_standard_success',array('template' => 'xpd/paybras/standard/success.phtml'));
-		$this->getLayout()->getBlock('content')->append($block);
-		$this->renderLayout();
-    }*/
-	
-	/**
-     * Exibe tela de falha após tentativa de repagamento
-     * 
-     *//*
-    public function failureAction() {
-		$session = Mage::getSingleton('core/session');
-		$paybras = Mage::getSingleton('paybras/standard');
-		
-		$this->loadLayout();
-		$this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
-		$block = $this->getLayout()->createBlock('Xpd_Paybras_Block_Standard_Failure','block_standard_failure',array('template' => 'xpd/paybras/standard/failure.phtml'));
-		$this->getLayout()->getBlock('content')->append($block);
-		$this->renderLayout();
-    }*/
+    
 }
