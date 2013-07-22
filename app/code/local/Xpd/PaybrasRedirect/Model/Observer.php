@@ -11,8 +11,8 @@ class Xpd_PaybrasRedirect_Model_Observer
 			
 			foreach ($customer->getAddresses() as $address) {
 				$data = $address->toArray();
-                
-                if(substr_count($data['street'],chr(10)) <= 3) {
+                //Mage::log('Log: '.$data['street']);
+                if(substr_count($data['street'],chr(10)) < 2) {
                     $msg = "Seus dados estão desatualizados, por favor atualize seu endereço antes de comprar.";
                     Mage::getSingleton('core/session')->setMsgEditError($msg);
                     //Mage::getSingleton('customer/session')->addError($msg);

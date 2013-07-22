@@ -44,7 +44,7 @@
     
     <sales_order_history translate="label">
         <reference name="sales.order.history">
-            <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/sales/order/history.phtml</template></action>
+            <action method="setTemplate" ifconfig="payment/paybrasboleto/unico"><template>xpd/paybras/sales/order/history.phtml</template></action>
         </reference>
     </sales_order_history>
 	

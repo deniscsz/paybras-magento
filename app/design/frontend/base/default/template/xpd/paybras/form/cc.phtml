@@ -194,14 +194,14 @@
             <label for="<?php echo $_code ?>_dob" class="required"><em>*</em><?php echo $this->__('Date of Birthday') ?></label><br />
             <div class="input-box">
                 <div class="v-fix">
-                    <select id="<?php echo $_code ?>_dob" name="payment[cc_dob_day]" class="day required-entry">
+                    <select id="<?php echo $_code ?>_dob" name="payment[cc_dob_day]" class="day validate-not-negative-number  required-entry">
                     <?php for($i=0;$i<=31;$i++): ?>
                         <option value="<?php echo $i?$i:'' ?>"<?php if($i == 0): ?> selected="selected"<?php endif ?>><?php echo $i == 0 ? 'Dia' : $i; ?></option>    
                     <?php endfor; ?>
                     </select>
                 </div>
                 <div class="v-fix">
-                    <select id="<?php echo $_code ?>_dob_mo" name="payment[cc_dob_month]" class="month required-entry">
+                    <select id="<?php echo $_code ?>_dob_mo" name="payment[cc_dob_month]" class="month validate-not-negative-number required-entry">
                     <?php $_ccExpMonth = $this->getInfoData('cc_exp_month'); ?>
                     <?php foreach ($this->getCcMonths() as $k=>$v): ?>
                         <option value="<?php echo $k?$k:'' ?>"<?php if($k==$_ccExpMonth): ?> selected="selected"<?php endif ?>><?php echo $v[0] == 'M' ? $v : substr($v,0,3); ?></option>
@@ -209,9 +209,10 @@
                     </select>
                 </div>
                 <div class="v-fix">
-                    <select id="<?php echo $_code ?>_dob_yr" name="payment[cc_dob_year]" class="year required-entry">
+                    <select id="<?php echo $_code ?>_dob_yr" name="payment[cc_dob_year]" class="year validate-not-negative-number required-entry">
                     <?php for($i=((int)date('Y') - 9);$i>((int)date('Y') - 100);$i--): ?>
-                        <option value="<?php echo $i?$i:'' ?>"<?php if($i == ((int)date('Y') - 9)): ?> selected="selected"<?php endif ?>><?php echo $i == ((int)date('Y') - 9) ? 'Ano' : $i; ?></option>    
+                        
+                        <option value="<?php echo $i ? $i == ((int)date('Y') - 9) ? 'Ano' : $i : '' ?>"<?php if($i == ((int)date('Y') - 9)): ?> selected="selected"<?php endif ?>><?php echo $i == ((int)date('Y') - 9) ? 'Ano' : $i; ?></option>    
                     <?php endfor; ?>
                     </select>
                 </div>
