@@ -226,7 +226,9 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
                 $fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
                 $fields['cartao_portador_telefone'] = substr($telefone,2);
                 $fields['cartao_portador_cpf'] = $additionaldata['cpf_titular'];
-                $fields['cartao_portador_data_de_nascimento'] = ($additionaldata['day_titular'] < 10 ? '0' . $additionaldata['day_titular'] : $additionaldata['day_titular']). '/' . ($additionaldata['month_titular'] < 10 ? '0' . $additionaldata['month_titular'] : $additionaldata['month_titular']) . '/' . $additionaldata['year_titular'];
+                if($additionaldata['day_titular'] && $additionaldata['month_titular'] && $additionaldata['year_titular']) {
+                    $fields['cartao_portador_data_de_nascimento'] = ($additionaldata['day_titular'] < 10 ? '0' . $additionaldata['day_titular'] : $additionaldata['day_titular']). '/' . ($additionaldata['month_titular'] < 10 ? '0' . $additionaldata['month_titular'] : $additionaldata['month_titular']) . '/' . $additionaldata['year_titular'];
+                }
             }
         }
         if($additionaldata['forma_pagamento'] == 'tef_bb') {
