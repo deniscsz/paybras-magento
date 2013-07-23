@@ -26,21 +26,32 @@ class Xpd_Paybras_Model_Observer extends Varien_Event_Observer {
             $url = 'https://sandbox.paybras.com/payment/getParcelas';
         }
         
-        $quote = Mage::getModel('checkout/session')->getQuote();
-        $total = $quote->getGrandTotal();
+        $quote = $observer['quote'];
+        $totals = $quote->getTotals();
+        $subtotal = $totals["subtotal"]->getValue();
+        
+        $methodEscolhido = $quote->getShippingAddress()->getShippingMethod();
+        $allMethods = $quote->getShippingAddress()->getShippingRatesCollection();
+        Mage::log($methodEscolhido);
+        foreach($allMethods as $rate) {
+            if($methodEscolhido == $rate->getCode()) {
+                $subtotal += $rate->getPrice();
+            }
+        }
         
         $fields = Array();
         $fields['recebedor_email'] = $paybras->getEmailStore();
         $fields['recebedor_api_token'] = $paybras->getToken();
-        $fields['pedido_valor_total'] = $total;
+        $fields['pedido_valor_total'] = $subtotal;
         
         $curlAdapter = new Varien_Http_Adapter_Curl();
         $curlAdapter->setConfig(array('timeout'   => 20));
         //$curlAdapter->connect(your_host[, opt_port, opt_secure]);
-        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array(), $fields);
+        $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
         $curlAdapter->close();
+        Mage::getSingleton('core/session')->unsMyParcelamento($retorno);
         Mage::getSingleton('core/session')->setMyParcelamento($retorno);
     }
 }
