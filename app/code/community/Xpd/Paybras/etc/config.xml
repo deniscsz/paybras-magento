@@ -100,6 +100,15 @@
                     </xpd_paybras_model_observer>
                 </observers>
             </sales_quote_save_before>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <xpd_paybras_model_observer>
+                        <type>singleton</type>
+                        <class>Xpd_Paybras_Model_Observer</class>
+                        <method>updateParcelamento</method>
+                    </xpd_paybras_model_observer>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
         </events>
     </global>
     <frontend>
