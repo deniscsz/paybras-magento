@@ -32,7 +32,7 @@ class Xpd_Paybras_Model_Observer extends Varien_Event_Observer {
         
         $methodEscolhido = $quote->getShippingAddress()->getShippingMethod();
         $allMethods = $quote->getShippingAddress()->getShippingRatesCollection();
-        Mage::log($methodEscolhido);
+        
         foreach($allMethods as $rate) {
             if($methodEscolhido == $rate->getCode()) {
                 $subtotal += $rate->getPrice();
