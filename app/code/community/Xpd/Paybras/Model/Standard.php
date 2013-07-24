@@ -193,10 +193,16 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         }
         
         $telefone = $billingAddress->getData('telephone');
-        $telefone = str_replace(')','',str_replace('(','',$telefone)); 
+        $telefone = $this->removeCharInvalidos($telefone); 
+        if(substr($telefone,0,1) == '0') {
+            $telefone = substr($telefone,1);
+        }
         
         $celular = $billingAddress->getData('celular') ? $billingAddress->getData('celular') : $billingAddress->getData('fax');
-        $celular = str_replace(')','',str_replace('(','',$celular)); 
+        $celular = $this->removeCharInvalidos($celular); 
+        if(substr($celular,0,1) == '0') {
+            $celular = substr($celular,1);
+        }
         
         $fields['pagador_telefone_ddd'] = substr($telefone,0,2);
         $fields['pagador_telefone'] = substr($telefone,2);
@@ -223,11 +229,15 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
             $samePerson = $this->comparaNome($fields['cartao_portador_nome'],$fields['pagador_nome']);
             if(!$samePerson) {
                 $telefone = $additionaldata['tel_titular'];
+                $telefone = $this->removeCharInvalidos($telefone); 
+                if(substr($telefone,0,1) == '0') {
+                    $telefone = substr($telefone,1);
+                }
                 $fields['cartao_portador_telefone_ddd'] = substr($telefone,0,2);
                 $fields['cartao_portador_telefone'] = substr($telefone,2);
                 $fields['cartao_portador_cpf'] = $additionaldata['cpf_titular'];
                 if($additionaldata['day_titular'] && $additionaldata['month_titular'] && $additionaldata['year_titular']) {
-                    $fields['cartao_portador_data_de_nascimento'] = ($additionaldata['day_titular'] < 10 ? '0' . $additionaldata['day_titular'] : $additionaldata['day_titular']). '/' . ($additionaldata['month_titular'] < 10 ? '0' . $additionaldata['month_titular'] : $additionaldata['month_titular']) . '/' . $additionaldata['year_titular'];
+                    $fields['cartao_portador_data_de_nascimento'] = $additionaldata['day_titular'] . '/' . $additionaldata['month_titular'] . '/' . $additionaldata['year_titular'];
                 }
             }
         }
@@ -533,6 +543,20 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 				default: return 'pending_payment';
 			}
 		}
+    }
+    
+    /**
+     * Remove caracteres indesejados
+     * 
+	 * @param string
+     * @return string
+     */
+    public function removeCharInvalidos($str) {
+        $invalid = array(' '=>'', '-'=>'', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => '');
+         
+        $str = str_replace(array_keys($invalid), array_values($invalid), $str);
+         
+        return $str;
     }
     
     /**

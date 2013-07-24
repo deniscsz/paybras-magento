@@ -181,10 +181,16 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
         }
         
         $telefone = $billingAddress->getData('telephone');
-        $telefone = str_replace(')','',str_replace('(','',$telefone)); 
+        $telefone = $this->removeCharInvalidos($telefone); 
+        if(substr($telefone,0,1) == '0') {
+            $telefone = substr($telefone,1);
+        }
         
         $celular = $billingAddress->getData('celular') ? $billingAddress->getData('celular') : $billingAddress->getData('fax');
-        $celular = str_replace(')','',str_replace('(','',$celular)); 
+        $celular = $this->removeCharInvalidos($celular); 
+        if(substr($celular,0,1) == '0') {
+            $celular = substr($celular,1);
+        }
         
         $fields['pagador_telefone_ddd'] = substr($telefone,0,2);
         $fields['pagador_telefone'] = substr($telefone,2);
