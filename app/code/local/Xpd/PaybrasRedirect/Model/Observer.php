@@ -26,7 +26,9 @@ class Xpd_PaybrasRedirect_Model_Observer
                     }
                     
                     $zip = $data['postcode'];
-                    $zip = $this->removeCharInvalidos($zip); 
+                    $zip = $this->removeCharInvalidos($zip);
+                    
+                    Mage::log('Zip: ' . $zip . ' Tel:' . $telefone); 
                     
                     if(substr_count($data['street'],chr(10)) < 2 || strlen($telefone) < 10 || strlen($zip) < 8) {
                         $msg = "Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.";
@@ -48,7 +50,7 @@ class Xpd_PaybrasRedirect_Model_Observer
 	}
     
     public function removeCharInvalidos($str) {
-        $invalid = array(' '=>'', '-'=>'', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => '');
+        $invalid = array(' '=>'', '-'=>'', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => '', 'a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
          
         $str = str_replace(array_keys($invalid), array_values($invalid), $str);
          
