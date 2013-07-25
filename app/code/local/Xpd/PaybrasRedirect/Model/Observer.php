@@ -3,7 +3,8 @@ class Xpd_PaybrasRedirect_Model_Observer
 {
     protected function _isRedirectCustomer($customerData) {
         $cpf = $this->removeCharInvalidos($customerData['taxvat']);
-        if(!$this->validaCPF($cpf)) {
+        
+        if(!$this->validaCPF($cpf) || $this->contemCharInvalidos($customerData['taxvat'],1,1)) {
             return false;
         }
         return true;
@@ -18,19 +19,17 @@ class Xpd_PaybrasRedirect_Model_Observer
             if($this->_isRedirectCustomer($customerData)) {
     			foreach ($customer->getAddresses() as $address) {
     				$data = $address->toArray();
+                    
                     $telefone = $data['telephone'];
-                    
-                    $telefone = $this->removeCharInvalidos($telefone); 
-                    if(substr($telefone,0,1) == '0') {
-                        $telefone = substr($telefone,1);
-                    }
-                    
+                    $telefone = str_replace(')','',str_replace('(','',$telefone));
+                    $telefone2 = $this->removeCharInvalidos($telefone); 
+                                        
                     $zip = $data['postcode'];
-                    $zip = $this->removeCharInvalidos($zip);
+                    $zip2 = $this->removeCharInvalidos($zip);
                     
                     Mage::log('Zip: ' . $zip . ' Tel:' . $telefone); 
                     
-                    if(substr_count($data['street'],chr(10)) < 2 || strlen($telefone) < 10 || strlen($zip) < 8) {
+                    if(substr_count($data['street'],chr(10)) < 2 || strlen($telefone2) < 10 || $this->contemCharInvalidos($telefone) || strlen($zip2) < 8 || $this->contemCharInvalidos($zip,1)) {
                         $msg = "Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.";
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
@@ -49,12 +48,23 @@ class Xpd_PaybrasRedirect_Model_Observer
 		return $this;
 	}
     
-    public function removeCharInvalidos($str) {
-        $invalid = array(' '=>'', '-'=>'', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => '', 'a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
+    public function removeCharInvalidos($str,$traco = NULL,$ponto = NULL) {
+        $invalid = array(' '=>'', '-' => $traco ? '-' : '', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => $ponto ? '.' : '', 'a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
          
         $str = str_replace(array_keys($invalid), array_values($invalid), $str);
          
         return $str;
+    }
+    
+    public function contemCharInvalidos($str,$traco = NULL,$ponto = NULL) {
+        $invalid = array(' '=>'', '-' => $traco ? '-' : '', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => $ponto ? '.' : '', 'a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
+         
+        if($str == str_replace(array_keys($invalid), array_values($invalid), $str)) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
     }
     
     function validaCPF($cpf) {
