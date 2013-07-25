@@ -25,7 +25,10 @@ class Xpd_PaybrasRedirect_Model_Observer
                         $telefone = substr($telefone,1);
                     }
                     
-                    if(substr_count($data['street'],chr(10)) < 2 && strlen($telefone) < 10) {
+                    $zip = $data['postcode'];
+                    $zip = $this->removeCharInvalidos($zip); 
+                    
+                    if(substr_count($data['street'],chr(10)) < 2 || strlen($telefone) < 10 || strlen($zip) < 8) {
                         $msg = "Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.";
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
