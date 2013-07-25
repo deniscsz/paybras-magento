@@ -445,5 +445,18 @@ class Xpd_Paybrastef_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 			}
 		}
     }
-        
+    
+    /**
+     * Remove caracteres indesejados
+     * 
+	 * @param string
+     * @return string
+     */
+    public function removeCharInvalidos($str) {
+        $invalid = array(' '=>'', '-'=>'', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => '');
+         
+        $str = str_replace(array_keys($invalid), array_values($invalid), $str);
+         
+        return $str;
+    }
 }
