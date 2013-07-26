@@ -27,8 +27,20 @@ class Xpd_PaybrasRedirect_Model_Observer
                     $zip = $data['postcode'];
                     $zip2 = $this->removeCharInvalidos($zip);
                     
-                    if(substr_count($data['street'],chr(10)) < 2 || strlen($telefone2) < 10 || $this->contemCharInvalidos($telefone) || strlen($zip2) < 8 || $this->contemCharInvalidos($zip,1)) {
-                        $msg = "Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.";
+                    if(substr_count($data['street'],chr(10)) < 2) {
+                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/addressinvalid');
+                        Mage::getSingleton('customer/session')->addError($msg);
+                        session_write_close();
+                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
+                    } 
+                    elseif(strlen($telefone2) < 10 || $this->contemCharInvalidos($telefone)) {
+                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/telinvalid');
+                        Mage::getSingleton('customer/session')->addError($msg);
+                        session_write_close();
+                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));    
+                    }
+                    elseif(strlen($zip2) < 8 || $this->contemCharInvalidos($zip,1)) {
+                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/cepinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
                         Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
@@ -36,7 +48,7 @@ class Xpd_PaybrasRedirect_Model_Observer
     			}
 			}
             else {
-                $msg = "Seu CPF está incorreto. Por favor atualize seus dados.";
+                $msg = Mage::getStoreConfig('payment/paybrasmsgs/cpfinvalid');
                 Mage::getSingleton('customer/session')->addError($msg);
                 session_write_close();
                 Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
