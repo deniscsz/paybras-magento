@@ -1,13 +1,30 @@
 <?php
 class Xpd_PaybrasRedirect_Model_Observer
 {
-    protected function _isRedirectCustomer($customerData) {
+	
+    protected function _isRedirectCustomerTax($customerData) {
         $cpf = $this->removeCharInvalidos($customerData['taxvat']);
-        
+		if(!$cpf) {
+			$cpf = $this->removeCharInvalidos($customerData['cpfcnpj']);
+		}
+		
         if(!$this->validaCPF($cpf) || $this->contemCharInvalidos($customerData['taxvat'],1,1)) {
             return false;
         }
-        return true;
+		else {
+			return true;
+		}
+    }
+	
+	protected function _isRedirectCustomerCpfCnpj($customerData) {
+		$cpfcnpj = $this->removeCharInvalidos($customerData['cpfcnpj']);
+		
+		if(!$this->validaCNPJ($cpfcnpj)) {
+			return false;
+		}
+		else {
+			return true;
+		}
     }
 
 	public function reedit(Varien_Event_Observer $observer) {
@@ -16,14 +33,14 @@ class Xpd_PaybrasRedirect_Model_Observer
 		if(Mage::getSingleton('customer/session')->isLoggedIn()) {
 			$customerData = Mage::getModel('customer/customer')->load($customer->getId())->getData();
 			
-            if($this->_isRedirectCustomer($customerData)) {
+            if($this->_isRedirectCustomerTax($customerData) || $this->_isRedirectCustomerCpfCnpj($customerData)) {
     			foreach ($customer->getAddresses() as $address) {
     				$data = $address->toArray();
                     
                     $telefone = $data['telephone'];
                     $telefone = str_replace(')','',str_replace('(','',$telefone));
                     $telefone2 = $this->removeCharInvalidos($telefone); 
-                                        
+                    
                     $zip = $data['postcode'];
                     $zip2 = $this->removeCharInvalidos($zip);
                     
@@ -100,6 +117,26 @@ class Xpd_PaybrasRedirect_Model_Observer
         }
     }
     
-    
-		
+    function validaCNPJ($cnpj){
+		$cnpj = str_pad(str_replace(array('.','-','/'),'',$cnpj),14,'0',STR_PAD_LEFT);
+		if (strlen($cnpj) != 14) {
+			return false;
+		}
+		else {
+			for($t = 12; $t < 14; $t++) {
+				for($d = 0, $p = $t - 7, $c = 0; $c < $t; $c++) {
+					$d += $cnpj{$c} * $p;
+					$p = ($p < 3) ? 9 : --$p;
+				}
+				
+				$d = ((10 * $d) % 11) % 10;
+				
+				if($cnpj{$c} != $d) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	
 }

@@ -62,9 +62,9 @@
     margin-right: 10px;
 }
 
-#payment_form_paybras #cc #paybras_cc_number {
+/*#payment_form_paybras #cc #paybras_cc_number {
     background: url("../images/paybras/padlock_clean.png") no-repeat scroll 225px white;
-}
+}*/
 
 #payment_form_paybras #cc select, #payment_form_paybras #cc option {
     outline: 0 none;
