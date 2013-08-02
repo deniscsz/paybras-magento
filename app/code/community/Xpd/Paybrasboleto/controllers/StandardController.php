@@ -105,7 +105,6 @@ class Xpd_Paybrasboleto_StandardController extends Mage_Core_Controller_Front_Ac
                 $payment->setPaybrasOrderId($url_redirect)->save();
             }
             
-            
             $url = Mage::getUrl('checkout/onepage/success');
         }
         else {

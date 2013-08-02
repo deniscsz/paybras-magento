@@ -11,10 +11,9 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     protected $_code = 'paybrasweb';
     protected $_formBlockType = 'paybrasweb/form';
     protected $_infoBlockType = 'paybrasweb/info';
-    protected $_isInitializeNeeded = true;
     
-    protected $_canUseInternal = true;
-    protected $_canUseForMultishipping = true;
+    protected $_canUseInternal = false;
+    protected $_canUseForMultishipping = false;
     protected $_canUseCheckout = true;
     protected $_order;
     protected $_ambiente = 1;

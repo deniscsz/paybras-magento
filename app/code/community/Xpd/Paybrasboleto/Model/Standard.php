@@ -11,11 +11,14 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
     protected $_code = 'paybrasboleto';
     protected $_formBlockType = 'paybrasboleto/form_boleto';
     protected $_infoBlockType = 'paybrasboleto/info';
-    protected $_isInitializeNeeded = true;
     
+    protected $_isInitializeNeeded = true;
     protected $_canUseInternal = true;
-    protected $_canUseForMultishipping = true;
     protected $_canUseCheckout = true;
+    protected $_canUseForMultishipping = false;
+    protected $_canAuthorize  = false;
+    protected $_canCapture = false;
+    
     protected $_order;
     protected $_ambiente = 1;
     
@@ -62,7 +65,7 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
      * @param bool $forceLog
      */
     public function log($message, $level = null, $file = 'paybras.log', $forceLog = false) {
-        Mage::log("Paybrasboleto - " . $message, $level, 'paybras.log', $forceLog);
+        Mage::log("Paybrasboleto - " . $message, $level, $file, $forceLog);
     }
     
     /**
@@ -105,18 +108,122 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
      * Sobrecarga da função assignData, acrecentado dados adicionais.
      * 
 	 * @param $data - Informação adiquirida do método de pagamento.
-     * @return Mage_Payment_Model_Method_Cc
+     * @return Mage_Payment_Model_Method_Abstract
      */
     public function assignData($data) {
         $details = array();
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
+        
         $info = $this->getInfoInstance();
         $additionaldata = array('forma_pagamento' => 'boleto');
         $info->setAdditionalData(serialize($additionaldata));
+        return $this;
+    }
+    
+    public function validate() {
+        parent::validate();
+        
+        $info = $this->getInfoInstance();
+        $additionaldata     = $info->getAdditionalData();
+        
+        if(!$additionaldata['forma_pagamento']) {
+    		$errorCode = 'invalid_data';
+    		$errorMsg = $this->_getHelper()->__('Selecione uma forma de pagamento');
+    		Mage::throwException($errorMsg);
+    	}
         
         return $this;
+    }
+    
+    /**
+     * Instantiate state and set it to state object
+     * @param $paymentAction
+     * @param object $stateObject
+     */
+    public function initialize($paymentAction, $stateObject) {
+        if (preg_match("|^/admin/admin/sales_order_create/|", $_SERVER['REQUEST_URI'])) {
+            $orders = Mage::getModel('sales/order')->getCollection()
+                 ->setOrder('increment_id','DESC')
+                 ->setPageSize(1)
+                 ->setCurPage(1);
+            $order = $orders->getFirstItem();
+            $orderId = $orders->getFirstItem()->getEntityId();
+            
+            $payment = $order->getPayment();
+                    
+            $this->log('Criando Boleto via ADMIN');
+            
+            if($this->getEnvironment() == '1') {
+                $url = 'https://service.paybras.com/payment/api/criaTransacao';
+            }
+            else {
+                $url = 'https://sandbox.paybras.com/payment/api/criaTransacao';
+            }
+            
+            $orderId = $order->getId();
+            $this->log('ID '. $orderId);
+            
+            if($order->getCustomerId()) {
+                $customer = Mage::getModel('customer/customer')->load($order->getCustomerId());
+            }
+            else {
+                $customer = false;
+            }
+    
+            $fields = $this->dataTransaction($customer,$order,$payment);
+            
+            $curlAdapter = new Varien_Http_Adapter_Curl();
+            $curlAdapter->setConfig(array('timeout'   => 20));
+            $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
+            $resposta = $curlAdapter->read();
+            $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
+            $curlAdapter->close();
+            
+            if(function_exists('json_decode')) {
+                $json_php = json_decode($retorno);
+                
+                if($json_php->{'sucesso'} == '1') {
+                    $this->log('True para consulta');
+                    $flag = true;
+                }
+                else {
+                    if($json_php->{'sucesso'} == '0') {
+                        $code_erro = $json_php->{'mensagem_erro'};
+                        $error_msg = Mage::helper('paybrasboleto')->msgError($code_erro);
+                        $this->log('False para consulta. Erro: '.$error_msg);
+                        $flag = false;
+                    }
+                    else {
+                        $this->log('Null para consulta '. $json_php->{'code'});
+                        $flag = NULL;
+                    }
+                }
+            }
+            else {
+                $this->log('[ Function Json_Decode does not exist! Upgrade PHP ]');
+            }
+            
+            if($flag) {
+                $transactionId = $json_php->{'transacao_id'};
+                $status_codigo = $json_php->{'status_codigo'};
+                
+                $payment->setPaybrasTransactionId(utf8_encode($transactionId))->save();
+                $this->processStatus($order,$status_codigo,$transactionId);
+                
+                $session = Mage::getSingleton('checkout/session');
+                $session->unsUrlRedirect();
+                $session->setFormaPag($fields['pedido_meio_pagamento']);
+    			$session->setStatePag($this->convertStatus($status_codigo));
+                
+                $url_redirect = utf8_decode($json_php->{'url_pagamento'});
+                if($url_redirect) {
+                    $session->setUrlRedirect($url_redirect);
+                    $payment->setPaybrasOrderId($url_redirect)->save();
+                }
+            }
+        }
     }
     
     /**
@@ -129,7 +236,6 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
      */
     public function dataTransaction($customer,$order,$payment,$post = NULL) {
         $fields = Array();
-        
         /* Dados do Recebedor */
         $fields['recebedor_api_token'] = $this->getToken();
         $fields['recebedor_email'] = $this->getEmailStore();
@@ -157,6 +263,7 @@ class Xpd_Paybrasboleto_Model_Standard extends Mage_Payment_Model_Method_Abstrac
             $fields['pagador_email'] = $customer->getEmail();
         }
         else {
+            $this->log($billingAddress);
             $fields['pagador_nome'] = $billingAddress->getFirstname() . ' ' . $billingAddress->getLastname();
             
             if($billingAddress->getCpfcnpj()) {

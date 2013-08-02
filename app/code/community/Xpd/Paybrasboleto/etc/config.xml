@@ -69,6 +69,7 @@
     <default>
         <payment>
             <paybrasboleto>
+                <payment_action>authorize</payment_action>
                 <active>1</active>
                 <model>paybrasboleto/standard</model>
                 <title>Paybras Boleto</title>
