@@ -46,6 +46,33 @@
                             <show_in_store>1</show_in_store>
                             <can_be_empty>1</can_be_empty>
                         </cepinvalid>
+						<emailinvalid translate="label">
+                            <label>E-mail Inválido</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </emailinvalid>
+						<celinvalid translate="label">
+                            <label>Celular Inválido</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </celinvalid>
+						<dobinvalid translate="label">
+                            <label>Data de Nascimento Inválida</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </dobinvalid>
                     </fields>
                 </paybrasmsgs>
             </groups>
