@@ -67,7 +67,13 @@ class Xpd_PaybrasRedirect_Model_Observer
                     
                     $dob = $customer->getDob();
                     
-                    if(substr_count($data['street'],chr(10)) < 2) {
+                    if(!strlen($data['region'])) {
+                        $msg = 'Sua informação de Estado do seu endereço está incorreta. Atualize suas informações';
+                        Mage::getSingleton('customer/session')->addError($msg);
+                        session_write_close();
+                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
+                    } 
+                    elseif(substr_count($data['street'],chr(10)) < 2) {
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/addressinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
