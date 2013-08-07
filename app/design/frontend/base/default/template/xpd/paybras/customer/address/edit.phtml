@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label for="region_id" class="required"><em>*</em><?php echo $this->__('State/Province') ?></label>
+                    <label for="region_id" class="required"><em id="em-state">*</em><?php echo $this->__('State/Province') ?></label>
                     <div class="input-box">
                         <select id="region_id" name="region_id" title="<?php echo $this->__('State/Province') ?>" class="validate-select" style="display:none;">
                            <option value=""><?php echo $this->__('Please select region, state or province') ?></option>
@@ -166,4 +166,16 @@
     var dataForm = new VarienForm('form-validate', true);
     new RegionUpdater('country', 'region', 'region_id', <?php echo $this->helper('directory')->getRegionJson() ?>, undefined, 'zip');
 //]]>
+$('em-state').show();
+
 </script>
+<style type="text/css">
+#em-state {
+    float: right;
+    font-style: normal;
+    color: #eb340a;
+    position: absolute;
+    top: 0;
+    right: -8px;
+}
+</style>
