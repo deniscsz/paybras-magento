@@ -59,7 +59,7 @@ class Xpd_PaybrasRedirect_Model_Observer
                     $telefone = str_replace(')','',str_replace('(','',$telefone));
                     $telefone2 = $this->removeCharInvalidos($telefone);
                     
-                    $celular = $data['celular'] ? $data['celular'] : $data['fax'];
+                    $celular = $data['fax'] ? $data['fax'] : $data['celular'];
                     $celular = $this->removeCharInvalidos($celular); 
                     
                     $zip = $data['postcode'];
