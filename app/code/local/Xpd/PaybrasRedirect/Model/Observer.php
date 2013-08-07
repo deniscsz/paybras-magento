@@ -73,7 +73,7 @@ class Xpd_PaybrasRedirect_Model_Observer
                         session_write_close();
                         Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
                     } 
-                    elseif(strlen($telefone2) < 10 && strlen($telefone2) > 11) {
+                    elseif(strlen($telefone2) < 10 || strlen($telefone2) > 11) {
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/telinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
@@ -84,7 +84,7 @@ class Xpd_PaybrasRedirect_Model_Observer
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
                         Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
-                    } elseif(strlen($celular) < 10 && strlen($celular) > 11) {
+                    } elseif(strlen($celular) < 10 || strlen($celular) > 11) {
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/celinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
                         session_write_close();
