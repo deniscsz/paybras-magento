@@ -122,12 +122,12 @@ class Xpd_PaybrasRedirect_Model_Observer
                 }
             }
             
-            session_write_close();
-            
             if($edit_redirect) {
+                session_write_close();
                 Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
             }
             elseif($address_redirect) {
+                session_write_close();
                 Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
             }
         }
