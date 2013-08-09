@@ -43,13 +43,13 @@
   <default>
     <payment>
         <paybrasmsgs>
-            <telinvalid>O telefone do seu endereço está incorreto, por favor atualize antes de comprar.</telinvalid>
-            <cepinvalid>Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.</cepinvalid>
-            <addressinvalid>Seus dados de endereço estão desatualizados, por favor atualize seu endereço antes de comprar.</addressinvalid>
+            <telinvalid>O telefone do seu endereço está incorreto. Por favor atualize antes de comprar.</telinvalid>
+            <cepinvalid>Seus dados de endereço estão desatualizados. Por favor atualize seu endereço antes de comprar.</cepinvalid>
+            <addressinvalid>Seus dados de endereço estão desatualizados. Por favor atualize seu endereço antes de comprar.</addressinvalid>
             <cpfinvalid>Seu CPF/CNPJ está incorreto. Por favor atualize seus dados.</cpfinvalid>
-			<emailinvalid>Seu e-mail utilizado no cadastro não é válido. Por favor altere seus dados.</emailinvalid>
-			<celinvalid>Seu número de celular está incorreto. Por favor atualize seus dados.</celinvalid>
-			<dobinvalid>Sua data de nascimento é inválida. Por favor atualize seus dados.</dobinvalid>
+			<emailinvalid>Seu e-mail utilizado no cadastro não é válido. Por favor altere seus dados antes de comprar.</emailinvalid>
+			<celinvalid>Seu número de celular está incorreto. Por favor atualize seus dados antes de comprar.</celinvalid>
+			<dobinvalid>Sua data de nascimento é inválida. Por favor atualize seus dados antes de comprar.</dobinvalid>
         </paybrasmsgs>
     </payment>
   </default>

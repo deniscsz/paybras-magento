@@ -24,9 +24,14 @@ class Xpd_PaybrasRedirect_Model_Observer
     protected function _isRedirectCustomerCpfCnpj($customerData) {
         $cpfcnpj = $this->removeCharInvalidos($customerData['cpfcnpj']);
         
-        if($this->validaCNPJ($cpfcnpj)) {
-            if(strlen($cpfcnpj) == 14) {
-                return true;
+        if($cpfcnpj) {
+            if($this->validaCNPJ($cpfcnpj)) {
+                if(strlen($cpfcnpj) == 14) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
             else {
                 return false;
@@ -43,76 +48,86 @@ class Xpd_PaybrasRedirect_Model_Observer
         if(Mage::getSingleton('customer/session')->isLoggedIn()) {
             $customerData = Mage::getModel('customer/customer')->load($customer->getId())->getData();
             
-            if($this->_isRedirectCustomerTax($customerData) || $this->_isRedirectCustomerCpfCnpj($customerData)) {
-                foreach ($customer->getAddresses() as $address) {
-                    $data = $address->toArray();
-                    $email = $customer->getEmail();
-					
-					if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-						$msg = Mage::getStoreConfig('payment/paybrasmsgs/emailinvalid');
-                        Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-						Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
+            foreach ($customer->getAddresses() as $address) {
+                $data = $address->toArray();
+                $email = $customer->getEmail();
+				
+				if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+					$msg = Mage::getStoreConfig('payment/paybrasmsgs/emailinvalid');
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    session_write_close();
+					Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
+				}
+				
+                $telefone = $data['telephone'];
+                //$telefone = str_replace(')','',str_replace('(','',$telefone));
+                $telefone2 = $this->removeCharInvalidos($telefone);
+                
+                $celular = $data['fax'] ? $data['fax'] : $data['celular'];
+                $celularLetras = $celular;
+                $celular = $this->removeCharInvalidos($celular); 
+                
+                $zip = $data['postcode'];
+                $zip2 = $this->removeCharInvalidos($zip);
+                
+                $dob = $customer->getDob();
+                $edit_redirect = 0;
+                $address_redirect = 0;
+                Mage::log('TESTE');
+                Mage::log('Tax: '.$this->_isRedirectCustomerTax($customerData));
+                Mage::log('Cnpj: '.$this->_isRedirectCustomerCpfCnpj($customerData));
+                if( !($this->_isRedirectCustomerTax($customerData) xor $this->_isRedirectCustomerCpfCnpj($customerData)) ) {
+                    $msg = Mage::getStoreConfig('payment/paybrasmsgs/cpfinvalid');
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    $edit_redirect = 1;
+                }
+                if($dob) {
+                    $dateTimestamp = Mage::getModel('core/date')->timestamp(strtotime($dob)) + 15000;
+					$data_nascimento = date('d-m-Y', $dateTimestamp);
+					$data_nascimento = explode("-",$data_nascimento);
+                    if( !((int)$data_nascimento[0] > 0 && (int)$data_nascimento[0] < 32) || !((int)$data_nascimento[1] > 0 && (int)$data_nascimento[1] < 13) || !((int)$data_nascimento[2] > 1935 && (int)$data_nascimento[2] < 2013) ) {
+                    	$msg = Mage::getStoreConfig('payment/paybrasmsgs/dobinvalid');
+						Mage::getSingleton('customer/session')->addError($msg);
+                        $edit_redirect = 1;
 					}
-					
-                    $telefone = $data['telephone'];
-                    $telefone = str_replace(')','',str_replace('(','',$telefone));
-                    $telefone2 = $this->removeCharInvalidos($telefone);
-                    
-                    $celular = $data['fax'] ? $data['fax'] : $data['celular'];
-                    $celular = $this->removeCharInvalidos($celular); 
-                    
-                    $zip = $data['postcode'];
-                    $zip2 = $this->removeCharInvalidos($zip);
-                    
-                    $dob = $customer->getDob();
-                    
-                    if(!strlen($data['region'])) {
-                        $msg = 'Sua informação de Estado do seu endereço está incorreta. Atualize suas informações';
-                        Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
-                    } 
-                    elseif(substr_count($data['street'],chr(10)) < 2) {
-                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/addressinvalid');
-                        Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
-                    } 
-                    elseif(strlen($telefone2) < 10 || strlen($telefone2) > 11) {
+				}
+                if(!strlen($data['region'])) {
+                    $msg = 'Sua informação de Estado do seu endereço está incorreta. Atualize suas informações';
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    $address_redirect = 1;
+                } 
+                if(substr_count($data['street'],chr(10)) < 2) {
+                    $msg = Mage::getStoreConfig('payment/paybrasmsgs/addressinvalid');
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    $address_redirect = 1;
+                } 
+                if(strlen($telefone2) < 10 || strlen($telefone2) > 11) {
+                    if(!preg_match('/(\([0-9]{2}\)|[0-9]{2})[ ]?[0-9]{4,5}[- ]?[0-9]{4}/',$telefone)) {
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/telinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));    
-                    }
-                    elseif(strlen($zip2) != 8) {
-                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/cepinvalid');
-                        Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
-                    } elseif((strlen($celular) < 10 || strlen($celular) > 11) && (strlen($celular) > 0)) {
+                        $address_redirect = 1;
+                    }    
+                }
+                if(strlen($zip2) != 8) {
+                    $msg = Mage::getStoreConfig('payment/paybrasmsgs/cepinvalid');
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    $address_redirect = 1;
+                } 
+                if((strlen($celular) < 10 || strlen($celular) > 11) && (strlen($celular) > 0)) {
+                    if(!preg_match('/(\([0-9]{2}\)|[0-9]{2})[ ]?[0-9]{4,5}[- ]?[0-9]{4}/',$celularLetras)) {
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/celinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
-                        session_write_close();
-                        Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));    
-                    } elseif($dob) {
-                        $dateTimestamp = Mage::getModel('core/date')->timestamp(strtotime($dob)) + 15000;
-						$data_nascimento = date('d-m-Y', $dateTimestamp);
-						$data_nascimento = explode("-",$data_nascimento);
-                        if( !((int)$data_nascimento[0] > 0 && (int)$data_nascimento[0] < 32) || !((int)$data_nascimento[1] > 0 && (int)$data_nascimento[1] < 13) || !((int)$data_nascimento[2] > 1935 && (int)$data_nascimento[2] < 2013) ) {
-                        	$msg = Mage::getStoreConfig('payment/paybrasmsgs/dobinvalid');
-							Mage::getSingleton('customer/session')->addError($msg);
-							session_write_close();
-							Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
-						}
-					}
+                        $address_redirect = 1;
+                    }
                 }
-            }
-            else {
-                $msg = Mage::getStoreConfig('payment/paybrasmsgs/cpfinvalid');
-                Mage::getSingleton('customer/session')->addError($msg);
                 session_write_close();
+            }
+            
+            if($edit_redirect) {
                 Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));
+            }
+            elseif($address_redirect) {
+                Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/address'));
             }
         }
         

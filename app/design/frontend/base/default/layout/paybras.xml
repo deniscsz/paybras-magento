@@ -24,7 +24,7 @@
     
 	<customer_account_index>
         <reference name="customer_account_dashboard_top">
-            <action method="setTemplate" ifconfig="payment/paybras/repay"><template>xpd/paybras/sales/order/recent.phtml</template></action>
+            <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/sales/order/recent.phtml</template></action>
         </reference>
     </customer_account_index> 
 	
@@ -42,7 +42,7 @@
     
     <sales_order_history translate="label">
         <reference name="sales.order.history">
-            <action method="setTemplate" ifconfig="payment/paybras/repay"><template>xpd/paybras/sales/order/history.phtml</template></action>
+            <action method="setTemplate" ifconfig="payment/paybras/allvalidation"><template>xpd/paybras/sales/order/history.phtml</template></action>
         </reference>
     </sales_order_history>
     
