@@ -25,7 +25,7 @@
  */
 ?>
 <?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
-<?php //$_orders = $this->getOrders(); 
+<?php $_orders = $this->getOrders(); 
 
     $_customer = Mage::getSingleton('customer/session')->getCustomer();
     

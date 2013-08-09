@@ -73,9 +73,7 @@ class Xpd_PaybrasRedirect_Model_Observer
                 $dob = $customer->getDob();
                 $edit_redirect = 0;
                 $address_redirect = 0;
-                Mage::log('TESTE');
-                Mage::log('Tax: '.$this->_isRedirectCustomerTax($customerData));
-                Mage::log('Cnpj: '.$this->_isRedirectCustomerCpfCnpj($customerData));
+                
                 if( !($this->_isRedirectCustomerTax($customerData) xor $this->_isRedirectCustomerCpfCnpj($customerData)) ) {
                     $msg = Mage::getStoreConfig('payment/paybrasmsgs/cpfinvalid');
                     Mage::getSingleton('customer/session')->addError($msg);

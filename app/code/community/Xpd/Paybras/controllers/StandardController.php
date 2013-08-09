@@ -47,6 +47,15 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         
         $orderId = $order->getId();
         
+        if(!$orderId) {
+            $orders = Mage::getModel('sales/order')->getCollection()
+                 ->setOrder('increment_id','DESC')
+                 ->setPageSize(1)
+                 ->setCurPage(1);
+            $order = $orders->getFirstItem();
+            $orderId = $orders->getFirstItem()->getEntityId();
+        }
+        
         $payment = $order->getPayment();
         
         if($order->getCustomerId()) {

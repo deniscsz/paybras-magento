@@ -430,7 +430,7 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     public function convertState($num,$repay = NULL) {
 		if($repay) {
 			switch($num) {
-				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 1: return Mage_Sales_Model_Order::STATE_NEW;//STATE_PENDING_PAYMENT;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
 				case 3: return Mage_Sales_Model_Order::STATE_CANCELED;
 				case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
@@ -440,12 +440,12 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 		}
 		else {
 			switch($num) {
-				case 1: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 1: return Mage_Sales_Model_Order::STATE_NEW;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
-				case 3: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 3: return Mage_Sales_Model_Order::STATE_NEW;
 				case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
-				case 5: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;//Mage_Sales_Model_Order::STATE_CANCELED;
-				default: return Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
+				case 5: return Mage_Sales_Model_Order::STATE_NEW;//Mage_Sales_Model_Order::STATE_CANCELED;
+				default: return Mage_Sales_Model_Order::STATE_NEW;
 			}
 		}
     }
@@ -460,7 +460,7 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $num = (int)$num;
 		if($repay) {
 			switch($num) {
-				case 1: return 'pending_payment';
+				case 1: return 'pending';//'pending_payment';
 				case 2: return 'holded';
 				case 3: return 'canceled';//'canceled';
 				case 4: return 'processing';
@@ -470,12 +470,12 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 		}
 		else {
 			switch($num) {
-				case 1: return 'pending_payment';
+				case 1: return 'pending';
 				case 2: return 'holded';
-				case 3: return 'pending_payment';
+				case 3: return 'pending';
 				case 4: return 'processing';
-				case 5: return 'pending_payment';
-				default: return 'pending_payment';
+				case 5: return 'pending';
+				default: return 'pending';
 			}
 		}
     }
