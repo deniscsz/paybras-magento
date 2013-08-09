@@ -87,16 +87,16 @@
 					</div>
 				</div>
 				<div class="field">
-					<label for="street_3" class="required"><em>*</em><?php echo $this->__('Complemento') ?></label>
+					<label for="street_3"><?php echo $this->__('Complemento') ?></label>
 					<div class="input-box">
-						<input type="text" title="<?php echo $this->__('Complemento') ?>" name="street[]" id="street_3" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(3)) ?>" class="input-text required-entry" />
+						<input type="text" title="<?php echo $this->__('Complemento') ?>" name="street[]" id="street_3" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(3)) ?>" class="input-text" />
 					</div>
 				</div>
 			</li>
 			<li class="wide">
 				<label for="street_4" class="required"><em>*</em><?php echo $this->__('Bairro') ?></label>
 				<div class="input-box">
-					<input type="text" title="<?php echo $this->__('Complemento') ?>" name="street[]" id="street_4" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(4)) ?>" class="input-text required-entry" />
+					<input type="text" title="<?php echo $this->__('Bairro') ?>" name="street[]" id="street_4" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(4)) ?>" class="input-text required-entry" />
 				</div>
 			</li>
             <li class="fields">
@@ -109,7 +109,7 @@
                 <div class="field">
                     <label for="region_id" class="required"><em id="em-state">*</em><?php echo $this->__('State/Province') ?></label>
                     <div class="input-box">
-                        <select id="region_id" name="region_id" title="<?php echo $this->__('State/Province') ?>" class="validate-select" style="display:none;">
+                        <select id="region_id" name="region_id" title="<?php echo $this->__('State/Province') ?>" class="validate-select select-estado validate-select" style="display:none;">
                            <option value=""><?php echo $this->__('Please select region, state or province') ?></option>
                         </select>
                         <script type="text/javascript">

@@ -48,6 +48,9 @@ class Xpd_PaybrasRedirect_Model_Observer
         if(Mage::getSingleton('customer/session')->isLoggedIn()) {
             $customerData = Mage::getModel('customer/customer')->load($customer->getId())->getData();
             
+            $edit_redirect = 0;
+            $address_redirect = 0;
+            
             foreach ($customer->getAddresses() as $address) {
                 $data = $address->toArray();
                 $email = $customer->getEmail();
@@ -71,8 +74,7 @@ class Xpd_PaybrasRedirect_Model_Observer
                 $zip2 = $this->removeCharInvalidos($zip);
                 
                 $dob = $customer->getDob();
-                $edit_redirect = 0;
-                $address_redirect = 0;
+                
                 
                 if( !($this->_isRedirectCustomerTax($customerData) xor $this->_isRedirectCustomerCpfCnpj($customerData)) ) {
                     $msg = Mage::getStoreConfig('payment/paybrasmsgs/cpfinvalid');
@@ -118,8 +120,9 @@ class Xpd_PaybrasRedirect_Model_Observer
                         $address_redirect = 1;
                     }
                 }
-                session_write_close();
             }
+            
+            session_write_close();
             
             if($edit_redirect) {
                 Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('customer/account/edit/'));

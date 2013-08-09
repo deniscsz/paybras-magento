@@ -87,9 +87,9 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label for="billing:street3" class="required"><em>*</em><?php echo $this->__('Complemento') ?></label>
+                        <label for="billing:street3"><?php echo $this->__('Complemento') ?></label>
                         <div class="input-box">
-                            <input type="text" title="<?php echo $this->__('Complemento') ?>" name="billing[street][]" id="billing:street3" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(3)) ?>" class="input-text required-entry" />
+                            <input type="text" title="<?php echo $this->__('Complemento') ?>" name="billing[street][]" id="billing:street3" value="<?php echo $this->htmlEscape($this->getAddress()->getStreet(3)) ?>" class="input-text" />
                         </div>
                     </div>
                 </li>
