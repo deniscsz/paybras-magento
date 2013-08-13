@@ -106,19 +106,17 @@ class Xpd_PaybrasRedirect_Model_Observer
                         $msg = Mage::getStoreConfig('payment/paybrasmsgs/telinvalid');
                         Mage::getSingleton('customer/session')->addError($msg);
                         $address_redirect = 1;
-                    }    
+                    }
                 }
                 if(strlen($zip2) != 8) {
                     $msg = Mage::getStoreConfig('payment/paybrasmsgs/cepinvalid');
                     Mage::getSingleton('customer/session')->addError($msg);
                     $address_redirect = 1;
-                } 
-                if((strlen($celular) < 10 || strlen($celular) > 11) && (strlen($celular) > 0)) {
-                    if(!preg_match('/(\([0-9]{2}\)|[0-9]{2})[ ]?[0-9]{4,5}[- ]?[0-9]{4}/',$celularLetras)) {
-                        $msg = Mage::getStoreConfig('payment/paybrasmsgs/celinvalid');
-                        Mage::getSingleton('customer/session')->addError($msg);
-                        $address_redirect = 1;
-                    }
+                }
+                if( ((strlen($celular) < 10 || strlen($celular) > 11) && (strlen($celular) > 0)) || $this->contemLetras($celularLetras)/*!preg_match('/(\([0-9]{2}\)|[0-9]{2})[ ]?[0-9]{4,5}[- ]?[0-9]{4}/',$celularLetras) */) {
+                    $msg = Mage::getStoreConfig('payment/paybrasmsgs/celinvalid') . ' ' . $celular;
+                    Mage::getSingleton('customer/session')->addError($msg);
+                    $address_redirect = 1;
                 }
             }
             
@@ -145,6 +143,17 @@ class Xpd_PaybrasRedirect_Model_Observer
     
     public function contemCharInvalidos($str,$traco = NULL,$ponto = NULL) {
         $invalid = array(' '=>'', '-' => $traco ? '-' : '', '{'=>'', '}'=>'', '('=>'', ')'=>'', '_'=>'', '['=>'', ']'=>'', '+'=>'', '*'=>'', '#'=>'', '/'=>'', '|'=>'', "`" => '', "´" => '', "„" => '', "`" => '', "´" => '', "“" => '', "”" => '', "´" => '', "~" => '', "’" => '', "." => $ponto ? '.' : '', 'a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
+         
+        if($str == str_replace(array_keys($invalid), array_values($invalid), $str)) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    }
+    
+    public function contemLetras($str) {
+        $invalid = array('a' => '', 'a' => '' , 'b' => '' , 'c' => '' , 'd' => '' , 'e' => '' , 'f' => '' , 'g' => '' , 'h' => '' , 'i' => '' , 'j' => '' , 'l' => '' , 'k' => '' , 'm' => '' , 'n' => '' , 'o' => '' , 'p' => '' , 'q' => '' , 'r' => '' , 's' => '' , 't' => '' , 'u' => '' , 'v' => '' , 'x' => '' , 'z' => '' , 'y' => '' , 'w' => '' , 'A' => '' , 'B' => '' , 'C' => '' , 'D' => '' , 'E' => '' , 'F' => '' , 'G' => '' , 'H' => '' , 'I' => '' , 'J' => '' , 'L' => '' , 'K' => '' , 'M' => '' , 'N' => '' , 'O' => '' , 'P' => '' , 'Q' => '' , 'R' => '' , 'S' => '' , 'T' => '' , 'U' => '' , 'V' => '' , 'X' => '' , 'Z' => '' , 'Y' => '' , 'W' => '');
          
         if($str == str_replace(array_keys($invalid), array_values($invalid), $str)) {
             return 0;
