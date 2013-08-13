@@ -26,7 +26,7 @@ class Xpd_Paybras_Model_Observer extends Varien_Event_Observer {
             $url = 'https://sandbox.paybras.com/payment/getParcelas';
         }
         
-        $quote = $observer['quote'];
+        /*$quote = $observer['quote'];
         $totals = $quote->getTotals();
         $subtotal = $totals["subtotal"]->getValue();
         
@@ -37,7 +37,8 @@ class Xpd_Paybras_Model_Observer extends Varien_Event_Observer {
             if($methodEscolhido == $rate->getCode()) {
                 $subtotal += $rate->getPrice();
             }
-        }
+        }*/
+        $subtotal = $observer['quote']->getGrandTotal();
         
         $fields = Array();
         $fields['recebedor_email'] = $paybras->getEmailStore();
