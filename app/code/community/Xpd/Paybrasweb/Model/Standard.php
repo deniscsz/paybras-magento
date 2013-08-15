@@ -225,7 +225,13 @@ class Xpd_Paybrasweb_Model_Standard extends Mage_Payment_Model_Method_Abstract {
         $fields['pagador_celular_ddd'] = substr($celular,0,2);
         $fields['pagador_celular'] = substr($celular,2);
         
-        $fields['pagador_sexo'] = $order->getCustomerGender();
+        $fields['pagador_sexo'] = $order->getCustomerGender() ? $order->getCustomerGender() : $order->getCustomer()->getGender();
+        
+        switch((int)$fields['pagador_sexo']) {
+            case 1: $fields['pagador_sexo'] = 'M'; break;
+            case 2: $fields['pagador_sexo'] = 'F'; break;
+            default: $fields['pagador_sexo'] = ''; break;
+        }
         
         $meiosPag = Mage::getStoreConfig('payment/paybrasweb/emailstore');
         $fields['pedido_tipos_pgto'] = '';
