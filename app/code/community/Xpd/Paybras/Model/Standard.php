@@ -423,13 +423,20 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 	           $order->unhold();
             }
             if ($order->canCancel()) {
-                $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
+                if(Mage::getStoreConfig('payment/paybras/repay') && !$repay) {
+                    $order_msg = "Pedido Não Autorizado. Aguardando segunda tentativa de pagamento. Transação: ". $transactionId;
+                    $this->log("Pedido Não Autorizado: ".$order->getRealOrderId() . ". Aguardando segunda tentativa de pagamento. Transação: ". $transactionId);
+                }
+                else {
+                    $order_msg = "Pedido Cancelado. Transação: ". $transactionId;
+                    $this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+                }
         		$order = $this->changeState($order,$status,NULL,$order_msg,$repay);
                 if($repay) {
 					$order->cancel();
 				}
 				$order->save();
-        		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+        		
                 return 0;
             }
             else {
@@ -448,11 +455,17 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 				if($status == 6) {
 					$order_msg = "Pedido Devolvido. Transação: ". $transactionId;
 				}
-        		$order = $this->changeState($order,$status,NULL,$order_msg,1);
+                $order = $this->changeState($order,$status,NULL,$order_msg,1);
 				$order->cancel();
-				
 				$order->save();
-        		$this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+                
+                if($status == 5) {
+                    $this->log("Pedido Cancelado: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+                }
+                elseif($status == 6) {
+                    $this->log("Pedido Devolvido: ".$order->getRealOrderId() . ". Transação: ". $transactionId);
+                }
+                
                 return 0;
             }
             else {
@@ -508,8 +521,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
      * @return Mage_Sales_Model_Order
      */
     public function convertState($num,$repay = NULL) {
-        Mage::log('O repay eh '.$repay);
-		if($repay != NULL) {
+        if($repay != NULL) {
 			switch($num) {
 				case 1: return Mage_Sales_Model_Order::STATE_NEW;//STATE_PENDING_PAYMENT;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
@@ -523,7 +535,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 			switch($num) {
 				case 1: return Mage_Sales_Model_Order::STATE_NEW;
 				case 2: return Mage_Sales_Model_Order::STATE_HOLDED;//Mage_Sales_Model_Order::STATE_HOLDED;
-				case 3: return Mage_Sales_Model_Order::STATE_NEW;
+				case 3: return Mage::getStoreConfig('payment/paybras/repay') ? Mage_Sales_Model_Order::STATE_NEW : Mage_Sales_Model_Order::STATE_CANCELED;
 				case 4: return Mage_Sales_Model_Order::STATE_PROCESSING;
 				case 5: return Mage_Sales_Model_Order::STATE_NEW;//Mage_Sales_Model_Order::STATE_CANCELED;
 				default: return Mage_Sales_Model_Order::STATE_NEW;
@@ -553,7 +565,7 @@ class Xpd_Paybras_Model_Standard extends Mage_Payment_Model_Method_Abstract {
 			switch($num) {
 				case 1: return 'pending';
 				case 2: return 'holded';
-				case 3: return 'pending';
+				case 3: return Mage::getStoreConfig('payment/paybras/repay') ? 'pending' : 'canceled';
 				case 4: return 'processing';
 				case 5: return 'pending';
 				default: return 'pending';

@@ -68,7 +68,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         $fields = $paybras->dataTransaction($customer,$order,$payment);
         Mage::log(json_encode($fields));
         $curlAdapter = new Varien_Http_Adapter_Curl();
-        $curlAdapter->setConfig(array('timeout'   => 20));
+        $curlAdapter->setConfig(array('timeout'   => 30));
         $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
         $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
@@ -179,7 +179,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
 			$fields = $paybras->dataTransaction($customer,$order,$payment,$_POST);
 			
 			$curlAdapter = new Varien_Http_Adapter_Curl();
-			$curlAdapter->setConfig(array('timeout'   => 20));
+			$curlAdapter->setConfig(array('timeout'   => 30));
 			$curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
 			$resposta = $curlAdapter->read();
 			$retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
@@ -310,7 +310,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
         $fields['pedido_valor_total'] = $total;
         
         $curlAdapter = new Varien_Http_Adapter_Curl();
-        $curlAdapter->setConfig(array('timeout'   => 20));
+        $curlAdapter->setConfig(array('timeout'   => 30));
         //$curlAdapter->connect(your_host[, opt_port, opt_secure]);
         $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
         $resposta = $curlAdapter->read();
@@ -407,7 +407,7 @@ class Xpd_Paybras_StandardController extends Mage_Core_Controller_Front_Action {
                 );
 				
                 $curlAdapter = new Varien_Http_Adapter_Curl();
-                $curlAdapter->setConfig(array('timeout' => 20));
+                $curlAdapter->setConfig(array('timeout' => 30));
                 $curlAdapter->write(Zend_Http_Client::POST, $url, '1.1', array('Content-Type: application/json','Content-Length: ' . strlen(json_encode($fields))), json_encode($fields));
                 $resposta = $curlAdapter->read();
                 $retorno = substr($resposta,strpos($resposta, "\r\n\r\n"));
